@@ -8,6 +8,80 @@ With **AI assistance**, record how you work on **typical websites** plus any **l
 
 **Example:** schedule the same checkout/form script daily, or add a block that only cleans `Downloads`—repeat runs **without** paying for full LLM-driven control each time.
 
+## OpenClaw setup
+
+Use this repo as an **OpenClaw skill**: the agent loads **`SKILL.md`** (router) and the locale file **`SKILL.zh-CN.md`** / **`SKILL.en-US.md`** from this directory, and runs **`rpa_manager.py`** for recording.
+
+### 1. Put the skill under the workspace `skills` folder
+
+| | Default path |
+|---|--------------|
+| OpenClaw workspace root | `~/.openclaw/workspace` |
+| This skill (directory name) | `~/.openclaw/workspace/skills/openclaw-rpa` |
+
+If the folder does not exist yet, clone this repository:
+
+```bash
+mkdir -p ~/.openclaw/workspace/skills
+git clone https://github.com/laziobird/openclaw-rpa.git ~/.openclaw/workspace/skills/openclaw-rpa
+```
+
+SSH: `git clone git@github.com:laziobird/openclaw-rpa.git ~/.openclaw/workspace/skills/openclaw-rpa`
+
+### 2. Python, Playwright, and Chromium
+
+From the skill directory:
+
+```bash
+cd ~/.openclaw/workspace/skills/openclaw-rpa
+chmod +x scripts/install.sh
+./scripts/install.sh
+```
+
+This creates **`.venv`** and installs **`requirements.txt`** + **`playwright install chromium`**.
+
+### 3. Skill configuration (`config.json`)
+
+OpenClaw reads **`metadata.openclaw.localeConfig`** in **`SKILL.md`**, which points to **`config.json`**. Create it from the example (default locale **`en-US`**):
+
+```bash
+cd ~/.openclaw/workspace/skills/openclaw-rpa
+python3 scripts/bootstrap_config.py
+python3 scripts/set_locale.py zh-CN    # or: en-US
+```
+
+See **`LOCALE.md`**. If **`config.json`** is missing, **`SKILL.md`** tells the agent to fall back to **`config.example.json`** for the `locale` field. After changing locale, start a **new session** or have the agent **re-read** **`SKILL.md`** / **`SKILL.*.md`**.
+
+### 4. Which Python runs `rpa_manager.py`?
+
+Recording uses **`sys.executable`**. The interpreter that starts **`rpa_manager.py`** must have **Playwright** installed. If your OpenClaw gateway runs tools with **system** `python3`, either install deps into that interpreter **or** configure the gateway to use:
+
+`~/.openclaw/workspace/skills/openclaw-rpa/.venv/bin/python`
+
+when invoking **`rpa_manager.py`** and generated scripts under **`rpa/`**.
+
+### 5. Reload the agent
+
+After first install or any change to **`SKILL*.md`** / **`config.json`**, open a **new chat** or reload skills so the agent picks up the latest instructions.
+
+### 6. Triggers and discovery
+
+Triggers and keywords are defined in **`SKILL.md`** (YAML `description` and router). Typical examples: `#RPA`, `#rpa`, “automation robot”, etc. To publish the skill for others, use **[ClawHub](https://clawhub.ai/publish-skill)** with this GitHub repo.
+
+### 7. Verify
+
+```bash
+cd ~/.openclaw/workspace/skills/openclaw-rpa
+source .venv/bin/activate   # optional
+python3 rpa_manager.py env-check
+```
+
+### 8. Paths inside `SKILL.en-US.md` / `SKILL.zh-CN.md`
+
+Those files may show commands under **`~/.openclaw/workspace/skills/openclaw-rpa/`**. If your workspace lives elsewhere, replace that prefix with your real skill path (or symlink).
+
+---
+
 ## Requirements
 
 - **Python 3.8+** (3.10+ recommended)
@@ -15,7 +89,9 @@ With **AI assistance**, record how you work on **typical websites** plus any **l
 
 ## Install (recommended)
 
-From this directory:
+If you already ran **`./scripts/install.sh`** in [OpenClaw setup](#openclaw-setup), skip this block.
+
+From the skill directory:
 
 ```bash
 chmod +x scripts/install.sh
@@ -50,22 +126,7 @@ python3 rpa_manager.py env-check
 
 `record-start` and `run` also verify Python + Playwright and **auto-install Chromium** when possible (same behavior as before).
 
-## First-time config (locale)
-
-The repo ships **`config.example.json`** only (default **`en-US`**).
-
-```bash
-python3 scripts/bootstrap_config.py
-```
-
-This creates **`config.json`** from the example. Edit `"locale"` or use:
-
-```bash
-python3 scripts/set_locale.py zh-CN
-python3 scripts/set_locale.py en-US
-```
-
-See **`LOCALE.md`** for details. After changing locale, start a new OpenClaw session or re-read **`SKILL.md`** / **`SKILL.*.md`**.
+Locale / **`config.json`** is covered in [OpenClaw setup §3](#openclaw-setup).
 
 ## Quick start (CLI)
 
