@@ -4,19 +4,14 @@ English | **[中文](README.zh-CN.md)**
 
 ## Demo video
 
-Sauce Demo ([saucedemo.com](https://www.saucedemo.com)) e-commerce screen recording — **watch on Bilibili** below. If the player does not render, open: **[Watch on bilibili.com](https://www.bilibili.com/video/BV1YfXrBBE9u/)**.
+Sauce Demo ([saucedemo.com](https://www.saucedemo.com)) e-commerce screen recording.
+
+> **Note:** GitHub README **does not render** third-party `<iframe>` embeds (they show as raw HTML). **Open the link below** to watch on Bilibili.
+
+### [▶ Watch on Bilibili (BV1YfXrBBE9u)](https://www.bilibili.com/video/BV1YfXrBBE9u/)
 
 <p align="center">
-  <iframe
-    src="https://player.bilibili.com/player.html?bvid=BV1YfXrBBE9u&page=1&high_quality=1&danmaku=0"
-    scrolling="no"
-    border="0"
-    frameborder="no"
-    framespacing="0"
-    allowfullscreen="true"
-    style="width:100%;max-width:960px;height:540px;border:0;"
-    title="openclaw-rpa Sauce Demo"
-  ></iframe>
+  <a href="https://www.bilibili.com/video/BV1YfXrBBE9u/"><img src="https://img.shields.io/badge/bilibili-Watch_demo-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white" alt="Watch on Bilibili"></a>
 </p>
 
 <p align="center">

@@ -4,19 +4,14 @@
 
 ## 演示视频
 
-Sauce Demo（[saucedemo.com](https://www.saucedemo.com)）电商购物流程录屏，**在线播放**见下方 B 站嵌入。若页面未显示播放器，请直接打开：**[哔哩哔哩 · 播放演示](https://www.bilibili.com/video/BV1YfXrBBE9u/)**。
+Sauce Demo（[saucedemo.com](https://www.saucedemo.com)）电商购物流程录屏。
+
+> **说明：** GitHub 的 README **不会渲染** B 站等第三方 `<iframe>`，嵌入代码会显示成纯文本；**在线观看请点下方链接**，在哔哩哔哩站内播放。
+
+### [▶ 在哔哩哔哩观看演示视频（BV1YfXrBBE9u）](https://www.bilibili.com/video/BV1YfXrBBE9u/)
 
 <p align="center">
-  <iframe
-    src="https://player.bilibili.com/player.html?bvid=BV1YfXrBBE9u&page=1&high_quality=1&danmaku=0"
-    scrolling="no"
-    border="0"
-    frameborder="no"
-    framespacing="0"
-    allowfullscreen="true"
-    style="width:100%;max-width:960px;height:540px;border:0;"
-    title="openclaw-rpa Sauce Demo 演示"
-  ></iframe>
+  <a href="https://www.bilibili.com/video/BV1YfXrBBE9u/"><img src="https://img.shields.io/badge/bilibili-点击播放演示-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white" alt="在哔哩哔哩播放"></a>
 </p>
 
 <p align="center">
