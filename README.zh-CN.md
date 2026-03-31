@@ -2,6 +2,36 @@
 
 **[English](README.md)** | 中文
 
+## 演示视频
+
+Sauce Demo（[saucedemo.com](https://www.saucedemo.com)）电商购物流程录屏；下方可直接播放，若无法显示请用链接打开。
+
+<video src="https://raw.githubusercontent.com/laziobird/openclaw-rpa/main/output.mp4" controls playsinline width="100%" style="max-width: 960px;"></video>
+
+<p align="left">
+  <sub>
+    <a href="https://github.com/laziobird/openclaw-rpa/blob/main/output.mp4">在 GitHub 打开</a>
+    · <a href="https://github.com/laziobird/openclaw-rpa/raw/main/output.mp4">下载 MP4</a>
+    · 仓库内 <a href="output.mp4"><code>output.mp4</code></a>
+  </sub>
+</p>
+
+**与视频一致的对话步骤**
+
+1. 发送 **`#rpa`** / **`#RPA`**，或消息中含 **`RPA`** / **「自动化机器人」**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
+2. 任务名示例：**`电商网站购物`**，或与已有脚本对齐如 **`电商网站购物V10`**（见 **`registry.json`**）。
+
+**本段任务提示词**
+
+1. 访问 `www.saucedemo.com`，账号 **`standard_user`** / 密码 **`secret_sauce`** 登录。  
+2. 价格**从高到低**排序。  
+3. 将**最贵的两件**商品加入购物车。  
+4. **退出登录**。
+
+录制协议（`record-start`、`record-step`、`plan-set`、结束录制等）见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md)。回放：`运行：{任务名}` 或 `python3 rpa_manager.py run <任务名>`。
+
+---
+
 > 借助 **AI**，把**常见网页**与**本机文件**相关操作录成 **可重复运行的 Playwright Python 脚本**。日常**直接跑脚本**，少调大模型——**省算力**，步骤**更稳**、少受幻觉影响。
 
 | | |
@@ -30,32 +60,6 @@ python3 rpa_manager.py env-check
 **SSH 克隆：** `git@github.com:laziobird/openclaw-rpa.git`
 
 装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 **`SKILL.md`**。触发词见 **`SKILL.md`**（如 `#RPA`、`自动化机器人`）。
-
----
-
-## 演示视频
-
-**场景：** Sauce Demo（[saucedemo.com](https://www.saucedemo.com)）电商购物流程，与仓库内录制 **`output.mp4`** 一致。
-
-| | |
-|:---|:---|
-| **视频** | [在 GitHub 上打开](https://github.com/laziobird/openclaw-rpa/blob/main/output.mp4) · [直链下载](https://github.com/laziobird/openclaw-rpa/raw/main/output.mp4) · 仓库内 [`output.mp4`](output.mp4) |
-
-**1. 对话里怎么开始（与视频一致）**
-
-1. 发送触发词，例如 **`#rpa`** / **`#RPA`**，或消息中含 **`RPA`** / **「自动化机器人」**（完整规则见 [**SKILL.md**](SKILL.md) 与 [**SKILL.zh-CN.md**](SKILL.zh-CN.md) 中「触发检测」小节）。
-2. 在引导中填写**任务名称**，例如 **`电商网站购物`**（也可与仓库已有脚本对齐，如 **`电商网站购物V10`**，见下表与 **`registry.json`**）。
-
-**2. 本段录制的任务提示词（可先拆解、再逐步 `record-step`）**
-
-1. 访问 `www.saucedemo.com`，使用账号 **`standard_user`**、密码 **`secret_sauce`** 登录。  
-2. 将商品按**价格从高到低**排序。  
-3. 将**价格最高的两件商品**加入购物车。  
-4. **退出登录**。
-
-**3. 详细步骤（协议与命令）**  
-录制、快照、`select_option`、多步 **`plan-set`**、**「结束录制」** → `record-end` 等，均以 [**SKILL.zh-CN.md**](SKILL.zh-CN.md) 为准（见 **ONBOARDING**、**RECORDING**、防超时与 **`record-step`** 表格）。  
-回放已保存任务：`运行：{任务名}`（例如 `运行：电商网站购物V10`），或 `python3 rpa_manager.py run <任务名>`（任务名以 **`registry.json`** 为准）。
 
 ---
 
@@ -125,7 +129,7 @@ python3 rpa_manager.py run wikipedia
 |------|------|
 | `wikipedia.py` / `wiki.py` | 维基百科（英文） |
 | `豆瓣电影.py` | 中文界面示例（遵守站点规则） |
-| `电商网站购物v10.py` 等 | Sauce Demo 电商流程（与 [演示视频](#演示视频) 同类） |
+| `电商网站购物v10.py` 等 | Sauce Demo 电商流程（与顶部 [演示视频](#演示视频) 同类） |
 
 更多说明见 **`examples/README.md`**。
 
