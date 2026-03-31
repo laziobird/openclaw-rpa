@@ -33,6 +33,31 @@ After install, **start a new OpenClaw chat** (or reload skills) so the agent rea
 
 ---
 
+## Demo video
+
+**Scenario:** Sauce Demo ([saucedemo.com](https://www.saucedemo.com)) e-commerce flow, same as recorded **`output.mp4`**.
+
+| | |
+|:---|:---|
+| **Video** | [View on GitHub](https://github.com/laziobird/openclaw-rpa/blob/main/output.mp4) · [Raw download](https://github.com/laziobird/openclaw-rpa/raw/main/output.mp4) · [`output.mp4`](output.mp4) in repo |
+
+**How this demo starts (matches the video)**
+
+1. Send a trigger, e.g. **`#rpa`** / **`#RPA`**, or a message containing **`RPA`** / **“automation robot”** — see [**SKILL.md**](SKILL.md) and [**SKILL.en-US.md** — Trigger detection](SKILL.en-US.md#trigger-detection).
+2. When prompted for a **task name**, use e.g. **`电商网站购物`** or align with an existing script like **`电商网站购物V10`** (see table below and **`registry.json`**).
+
+**Task prompt used in this recording**
+
+1. Open `www.saucedemo.com`, sign in with **`standard_user`** / **`secret_sauce`**.  
+2. Sort products **price high → low**.  
+3. Add the **two most expensive** items to the cart.  
+4. **Log out**.
+
+**Full protocol** — `record-start`, `record-step`, `plan-set`, “end recording” / `record-end`: follow [**SKILL.en-US.md**](SKILL.en-US.md) (ONBOARDING, RECORDING).  
+Replay: `run:{task}` or `python3 rpa_manager.py run <name>` per **`registry.json`**.
+
+---
+
 ## Advanced
 
 <details>
@@ -97,10 +122,9 @@ Recorder: `record-start` → `record-step` → `record-end` (see `rpa_manager.py
 
 | Script | Notes |
 |--------|--------|
-| `wikipedia.py` | Stable public site (English) |
-| `wiki.py` | Same idea, different name |
+| `wikipedia.py` / `wiki.py` | Wikipedia (English) |
 | `豆瓣电影.py` | Chinese UI demo (follow site rules) |
-| `电商网站购物v10.py` | E-commerce-style demo (example only) |
+| `电商网站购物v10.py` (and related) | Sauce Demo flow (same family as the [demo video](#demo-video)) |
 
 More notes: **`examples/README.md`**.
 
