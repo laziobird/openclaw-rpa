@@ -9,11 +9,15 @@
 | 观看方式 | 链接 |
 |:--|:--|
 | **哔哩哔哩（推荐，高清）** | **[▶ 点击播放](https://www.bilibili.com/video/BV1YfXrBBE9u/)**（BV1YfXrBBE9u） |
-| **本仓库录屏** | **[▶ 在 GitHub 上播放](https://github.com/laziobird/openclaw-rpa/blob/main/saucedemo-readme.mp4)**（`saucedemo-readme.mp4`，页内即可点播放） |
 
-<p align="center">
-  <a href="https://www.bilibili.com/video/BV1YfXrBBE9u/"><img src="https://img.shields.io/badge/bilibili-播放演示-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white" alt="哔哩哔哩播放"></a>
-</p>
+
+
+
+https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
+
+
+
+
 
 **与视频一致的对话步骤**
 
