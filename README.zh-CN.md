@@ -4,15 +4,15 @@
 
 ## 演示视频
 
-Sauce Demo（[saucedemo.com](https://www.saucedemo.com)）电商购物流程录屏；下方可直接播放，若无法显示请用链接打开。
+Sauce Demo（[saucedemo.com](https://www.saucedemo.com)）电商购物流程录屏。  
+GitHub 的 README **不能稳定内嵌** `<video>`。请点下面链接进入 **GitHub 文件预览页**：页面中有官方播放器，**再点播放即可**（比在 README 里嵌视频更可靠）。
 
-<video src="https://raw.githubusercontent.com/laziobird/openclaw-rpa/main/output.mp4" controls playsinline width="100%" style="max-width: 960px;"></video>
+### [▶ 点击打开：在 GitHub 上播放演示视频](https://github.com/laziobird/openclaw-rpa/blob/main/output.mp4)
 
-<p align="left">
+<p align="center">
   <sub>
-    <a href="https://github.com/laziobird/openclaw-rpa/blob/main/output.mp4">在 GitHub 打开</a>
-    · <a href="https://github.com/laziobird/openclaw-rpa/raw/main/output.mp4">下载 MP4</a>
-    · 仓库内 <a href="output.mp4"><code>output.mp4</code></a>
+    <a href="https://github.com/laziobird/openclaw-rpa/raw/main/output.mp4">备用：直链在浏览器中打开</a>（部分浏览器会直接全屏播放）
+    · 仓库文件 <a href="output.mp4"><code>output.mp4</code></a>
   </sub>
 </p>
 

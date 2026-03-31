@@ -4,14 +4,14 @@ English | **[中文](README.zh-CN.md)**
 
 ## Demo video
 
-Sauce Demo ([saucedemo.com](https://www.saucedemo.com)) e-commerce screen recording — play inline below, or use the links if playback fails.
+Sauce Demo ([saucedemo.com](https://www.saucedemo.com)) e-commerce screen recording.  
+GitHub README **does not reliably embed** `<video>`. Use the link below to open the **file view on GitHub** — it includes GitHub’s **built-in player** (press play there).
 
-<video src="https://raw.githubusercontent.com/laziobird/openclaw-rpa/main/output.mp4" controls playsinline width="100%" style="max-width: 960px;"></video>
+### [▶ Open & play demo video on GitHub](https://github.com/laziobird/openclaw-rpa/blob/main/output.mp4)
 
-<p align="left">
+<p align="center">
   <sub>
-    <a href="https://github.com/laziobird/openclaw-rpa/blob/main/output.mp4">Open on GitHub</a>
-    · <a href="https://github.com/laziobird/openclaw-rpa/raw/main/output.mp4">Download MP4</a>
+    <a href="https://github.com/laziobird/openclaw-rpa/raw/main/output.mp4">Fallback: raw MP4 in browser</a> (may play in-tab)
     · <a href="output.mp4"><code>output.mp4</code></a> in repo
   </sub>
 </p>
