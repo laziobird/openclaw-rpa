@@ -32,3 +32,6 @@ venv/
 # Large screen recording source; use compressed shoppingWebSite.mp4 in repo/docs
 /shoppingWebSite.mov
 /rpa-list-all.mov
+
+# Optional local ClawHub export dir (if you set CLAWHUB_EXPORT_DIR inside this repo)
+/clawhub-upload/

@@ -48,7 +48,7 @@ https://github.com/user-attachments/assets/514e2d74-f42a-4243-8d49-52931fe6c22e
 |         |                             |
 | ------- | --------------------------- |
 | **环境**  | Python **3.8+**，需网络安装依赖与浏览器 |
-| **许可证** | [Apache 2.0](LICENSE)       |
+| **许可证** | [Apache 2.0](LICENSE.md) |
 
 
 ---

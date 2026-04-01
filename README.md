@@ -45,7 +45,7 @@ Full protocol: [**SKILL.en-US.md**](SKILL.en-US.md) (ONBOARDING, RECORDING). **S
 | | |
 |:---|:---|
 | **Needs** | Python **3.8+**, network for `pip` / Playwright browsers |
-| **License** | [Apache 2.0](LICENSE) |
+| **License** | [Apache 2.0](LICENSE.md) |
 
 ---
 
