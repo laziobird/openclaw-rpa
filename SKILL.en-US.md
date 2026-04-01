@@ -1,24 +1,52 @@
 ---
 name: openclaw-rpa
 language: en-US
-description: English body for openclaw-rpa. AI records browser + local-file actions into a Playwright RPA script; replay without LLM saves compute and avoids hallucinated steps (loaded when config.json locale is en-US).
+description: Record browser & local-file actions once; replay runs without the LLM—save $ vs AI browsing, faster, no hallucinations. github.com/laziobird/openclaw-rpa
 metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 ---
 
 > **This file:** `en-US` (selected by `locale` in [config.json](config.json) or [config.example.json](config.example.json) if `config.json` is missing; Chinese: [SKILL.zh-CN.md](SKILL.zh-CN.md))
 
+> **GitHub:** **[https://github.com/laziobird/openclaw-rpa](https://github.com/laziobird/openclaw-rpa)** — install, `rpa/` samples, issues
+
 # openclaw-rpa
 
-## Introduction
+**Example automations** (illustrative; **obey each site’s terms of use and applicable law**): **e‑commerce login & shopping**; **Yahoo Finance** stock quotes / news; movie sites **reviews & ratings** in one scripted run.
 
-With **AI assistance**, this skill **records** actions on common websites and (when needed) **local file** behavior into a **Playwright Python RPA script**. **Replay** runs that script directly—**without** the LLM operating the browser every time—so you **save compute/API cost** and get **repeatable, accurate** steps instead of **hallucination-prone** “let the model improvise each run.”
+## What this skill does
 
-The output is **ordinary Python**: you may still add **local file** helpers after **`record-end`** (`pathlib` / `shutil` / `open()`, or **`extract_text`** during recording)—browser-only, file-only, or both.
+**openclaw-rpa** is a **Recorder → Playwright script** pipeline: the agent drives a real browser, you confirm steps, and **`record-end`** compiles a **normal Python** file under `rpa/`. **Replay** runs that file with **`rpa_manager.py run`**—**no** LLM per click.
 
-### Running recorded scripts (what exists, then what to run)
+**Highlights**
 
-- **What’s available:** Send **`#rpa-list`**. It prints **recorded, registered** RPA task names you can run (same as `registry.json` / `rpa_manager.py list`). **Use this first** if you don’t know the exact name.
-- **Run one of them:** Copy a name from that list, then send **`#rpa-run:{task name}`** (works well in a **new chat** with no prior context) or **`run:{task name}`** (**same chat**). Both **execute the saved script again**—they do **not** start a new recording.
+1. **Saves compute and money** — Letting a **large model** operate the browser **every** time can cost **on the order of single-digit to tens of US dollars** per heavy session (tokens, tools, long context). After you **record once**, repeat runs **do not invoke the model**—cost is essentially **local script execution**, and runs are **much faster** than step-by-step LLM reasoning.
+2. **Verify the flow once, then run the same steps every time** — During recording you **prove** the task works; replay **executes the saved steps** deterministically. You avoid asking the AI to improvise on each run, which **reduces inconsistency** and **hallucination-driven** mistakes.
+
+Output is **ordinary Python**; after **`record-end`** you may still patch helpers (`pathlib` / `shutil` / `open()`, or **`extract_text`** during recording)—browser-only, file-only, or both.
+
+## When to use
+
+| Goal | What to send |
+|------|----------------|
+| **Start recording** a new flow | `#automation robot`, `#RPA`, `#rpa`, or mention **Playwright automation** |
+| **List saved tasks** | `#rpa-list` |
+| **Run a saved task** (e.g. new chat) | `#rpa-run:{task name}` |
+| **Run in this chat** | `run:{task name}` |
+| **Schedule / reminder** (OpenClaw + IM) | Natural language + `#rpa-run:…` — depends on your gateway |
+
+## Quick start
+
+```bash
+python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list   # same as #rpa-list
+python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py run "your-task-name"
+```
+
+In chat, prefer **`#rpa-list`** → **`#rpa-run:your-task-name`** so names match `registry.json`.
+
+### Running recorded scripts (reminder)
+
+- **`#rpa-list`** — shows **registered** task names; use **first** if unsure.
+- **`#rpa-run:{task}`** / **`run:{task}`** — **execute the saved script again**; they do **not** start a new recording.
 
 ## Scope (details)
 
@@ -32,7 +60,7 @@ The output is **ordinary Python**: you may still add **local file** helpers afte
 
 | Pattern | Example |
 |---------|---------|
-| **Browser only** | Demo store: search → product → cart (`rpa/电商网站购物*.py` style). |
+| **Browser only** | **E‑commerce:** login → browse → cart/checkout (`rpa/电商网站购物*.py` style). **Yahoo Finance:** quotes / headlines. **Movies:** aggregate **reviews & ratings**. |
 | **Browser then files** | Same flow, plus **`extract_text`** when asked. |
 | **Files only in script** | After **`record-end`**, add folder cleanup—**no URL** for that block. |
 

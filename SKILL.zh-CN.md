@@ -1,31 +1,57 @@
 ---
 name: openclaw-rpa
-description: 借助 AI 将常见网页与本机文件操作录制成可重复运行的 RPA（Playwright Python）；日常执行跑脚本、少依赖模型，省算力且步骤稳定，降低幻觉风险。触发：「#自动化机器人」「#RPA」「#rpa」「#rpa-list」；查看可用任务「#rpa-list」，执行：「#rpa-run:任务名」或「#运行:任务名」。Use when user says #自动化机器人, #RPA, #rpa, #rpa-list, 录制自动化, 生成脚本, Playwright automation, or asks to automate repetitive browser/file tasks.
+description: 录制浏览器网站与本机文件操作；回放不调大模型—省费用、更快、少幻觉。github.com/laziobird/openclaw-rpa · #rpa-list #rpa-run #运行 #自动化机器人 #RPA。Use when user says #自动化机器人, #RPA, #rpa, #rpa-list, 录制自动化, browser automation, or asks to automate browser/file tasks.
 metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 ---
 
 > **本文件语言：** `zh-CN`（由 [config.json](config.json) 或缺失时的 [config.example.json](config.example.json) 中 `locale` 选择；英文全文见 [SKILL.en-US.md](SKILL.en-US.md)）
 
+> **GitHub 源码仓库：** **[https://github.com/laziobird/openclaw-rpa](https://github.com/laziobird/openclaw-rpa)**（安装说明、`rpa/` 示例、问题与反馈）
+
 # openclaw-rpa
 
-## 简介
+**典型场景示例（录制一次、反复回放；须遵守各站服务条款与所在地法规）：** 电商 **登录与购物** 全流程自动化；**Yahoo 财经** 股票行情与新闻 **自动获取**；电影类网站 **一键汇总影评与评分** 等。
 
-借助 **AI**，把你在**常见网站**上的操作，以及需要的**本机文件**行为，**录制成可重复运行的 RPA 脚本**（Python / Playwright）。日常执行**直接跑脚本**，不必每次让模型现场操作网页——**省算力（少调模型）**，且步骤按录制固定执行，**更稳**，**降低模型幻觉**带来的误操作。
+## 这个 skill 做什么
 
-生成物为普通 Python：录制中可用 **`extract_text`**；**`record-end`** 后可按需追加 **`pathlib` / `shutil` / `open()`**，见 [playwright-templates.md](playwright-templates.md)。浏览器与本地文件可只做其一，也可组合。
+**openclaw-rpa** 是一条 **录制 → 生成 Playwright 脚本 → 反复回放** 的流水线：在真实浏览器里按你的指令一步步执行并截图确认，**`#结束录制`** 后把步骤编译成 **`rpa/` 下的普通 Python**。日常**直接跑脚本**，不必每次让模型现场点网页。生成物可再按需加本机文件处理（`pathlib` / `extract_text` 等），见 [playwright-templates.md](playwright-templates.md)。
 
-**不强调** — 重型 ETL、数据库或大型系统运维；请用专门工具。
+**亮点**
+
+1. **大幅节约算力与费用** — 若每次重复操作都让**大模型**代点浏览器，单次会话往往 **数美金到数十美金** 量级（token、工具、长上下文等）。录成 RPA 后，**重复执行不再调大模型**，成本接近 **仅跑本地脚本**，且 **速度远快于** 每步都等模型推理。
+2. **第一次把流程跑通、确认无误，以后按同一套步骤执行** — 录制阶段你已 **验证** 任务能正确完成；回放时 **严格按已保存步骤执行**（可预期、可重复），不必每次再让 AI「临场发挥」。避免 **反复调用大模型** 带来的 **稳定性变差** 与 **幻觉、误操作** 风险。
+
+**不适合** — 重型 ETL、数据库或大型运维；请用专门工具。
+
+## 何时用（对照发什么）
+
+| 你想… | 发什么 |
+|--------|--------|
+| **开始录制**新流程 | `#自动化机器人`、`#RPA`、`#rpa`，或提到 **Playwright automation** |
+| **看已保存的任务** | `#rpa-list` |
+| **执行已保存任务**（如新对话） | `#rpa-run:{任务名}` |
+| **当前会话里执行** | `#运行:{任务名}` |
+| **在 OpenClaw + 飞书等里定时/提醒** | 自然语言 + `#rpa-run:…`（以实际接入为准） |
+
+## 快速上手
+
+```bash
+python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list
+python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py run "任务名"
+```
+
+对话里可发 **`#rpa-list`** → **`#rpa-run:任务名`**，名称与 `registry.json` 一致即可。
 
 ### 运行已录制的任务（先看有哪些，再跑哪一个）
 
-- **有哪些可以跑**：发 **`#rpa-list`**，会列出 **当前已录制、已登记**、可直接执行的 RPA 任务名（与 `registry.json` / `rpa_manager.py list` 一致）。不知道名字时**先发这一条**。
-- **跑其中一个**：从列表里复制 **任务名**，发 **`#rpa-run:任务名`**（适合 **新开一条对话**，不依赖当前聊天上下文）或 **`#运行:任务名`**（**还在当前会话里**时直接执行）。二者都是「用已生成好的脚本再跑一遍」，不是重新录制。
+- **有哪些可以跑**：发 **`#rpa-list`**，列出 **当前已登记、可执行** 的任务名。不知道名字时**先发这一条**。
+- **跑其中一个**：**`#rpa-run:任务名`**（**新开对话**）或 **`#运行:任务名`**（**当前会话**）。二者都是 **再次执行已生成脚本**，不是重新录制。
 
 ### 说明性例子（非穷举）
 
 | 类型 | 含义 |
 |------|------|
-| **仅浏览器** | 如电商类：搜索 → 商品 → 加购（参考仓库 `rpa/电商网站购物*.py`）。 |
+| **仅浏览器** | 如电商：**登录 → 选购 → 加购/结算**（参考仓库 `rpa/电商网站购物*.py`）；或 **Yahoo 财经** 行情/新闻；或电影站 **影评与评分** 汇总。 |
 | **浏览器 + 文件** | 同上，必要时 **`extract_text`** 落盘。 |
 | **脚本内文件** | 录完后只加整理下载目录、改名等——可与网页无关。 |
 

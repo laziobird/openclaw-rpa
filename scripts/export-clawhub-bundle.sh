@@ -32,6 +32,10 @@ rsync -a --delete \
   --exclude '*.jsonl' \
   "$ROOT/" "$OUT/"
 
+# ClawHub rejects dotfiles named .gitignore; keep them in git, omit from upload bundle.
+find "$OUT" -name '.gitignore' -delete
+rmdir "$OUT/proofs" 2>/dev/null || true
+
 # Ensure SKILL.md exists at bundle root
 if [[ ! -f "$OUT/SKILL.md" ]]; then
   echo "ERROR: SKILL.md missing in bundle" >&2

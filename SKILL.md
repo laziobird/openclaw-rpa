@@ -1,9 +1,6 @@
 ---
 name: openclaw-rpa
-description: >
-  OpenClaw RPA: AI-assisted recording of browser and local-file actions into a Playwright Python script. Replay without the LLM each run—saves compute and keeps steps deterministic (vs. hallucinated ad-hoc automation). Triggers: "#automation robot", "#RPA", "#rpa", "#rpa-list", "Playwright automation"; list recorded tasks: "#rpa-list"; run a saved script: "#rpa-run:{task}" or "run:{task}".
-  中文触发：「#自动化机器人」「#RPA」「#rpa」「#rpa-list」；查看可用任务「#rpa-list」，执行已录制脚本：「#rpa-run:任务名」或「#运行:任务名」。
-  Locale: read config.json (or config.example.json if config.json is missing) → SKILL.zh-CN.md or SKILL.en-US.md.
+description: Record browser & local-file actions once; replay runs without the LLM—save $ vs AI browsing, faster, no hallucinations. github.com/laziobird/openclaw-rpa
 metadata:
   openclaw:
     emoji: "🤖"
@@ -15,6 +12,37 @@ metadata:
 ---
 
 # openclaw-rpa — **Locale router (read this first)**
+
+**GitHub:** **[https://github.com/laziobird/openclaw-rpa](https://github.com/laziobird/openclaw-rpa)** — source, README, install, sample scripts under `rpa/`.
+
+**Example flows** (ideas; record once, replay many times—**follow each site’s terms and local law**): **e‑commerce login & shopping**; **Yahoo Finance** stock quotes / news headlines; movie sites **reviews & ratings** in one automated run.
+
+## What this skill does
+
+**openclaw-rpa** turns repeatable **web** and optional **local file** work into a **Playwright Python** script by **recording** what actually happens in a real browser (plus file steps when needed). **Replay** runs that script directly—**not** the model clicking every time—so runs are **deterministic**, **cheaper**, and **less error-prone** than ad-hoc “automate this now” prompts.
+
+**Why this matters**
+
+1. **Saves compute and money** — Having a **large model** drive the browser on **every** run can cost **roughly single-digit to tens of US dollars** per heavy session (tokens, tools, long context). After you **record once**, repeat work **does not call the model**—replay is **much faster** and **near-zero** LLM cost for those steps.
+2. **Verify once, run the same way every time** — During recording you **confirm** the flow works; later, replay **executes the saved steps** deterministically. You avoid asking the AI to “do it again” on every run, which **hurts consistency** and **raises hallucination risk**.
+
+## When to use
+
+| You want to… | Send |
+|----------------|------|
+| **Start recording** a new flow | `#automation robot`, `#RPA`, `#rpa`, or mention **Playwright automation** |
+| **See saved tasks** you can run | `#rpa-list` |
+| **Run a saved task** (e.g. new chat) | `#rpa-run:{task name}` |
+| **Run in this chat** | `run:{task name}` (`zh-CN`: `#运行:{任务名}`) |
+
+## Quick start (after install)
+
+```text
+#rpa-list
+#rpa-run:your-task-name
+```
+
+Full protocol, state machine, and `record-step` JSON live in the locale file below.
 
 ## Mandatory: load the correct instruction file
 
@@ -39,8 +67,8 @@ After a locale change, the agent should **re-read** the matching `SKILL.*.md` in
 
 ## ClawHub / discovery
 
-- This file is intentionally short; **discoverability** keywords appear in YAML `description` (bilingual).
-- Full behaviour lives in **`SKILL.zh-CN.md`** and **`SKILL.en-US.md`**.
+- **SKILL.md** (this file): short router + **when to use** + **quick start** for listings like [ClawHub](https://clawhub.ai/).
+- **SKILL.zh-CN.md** / **SKILL.en-US.md**: full **onboarding**, **recording**, **RUN/LIST**, and anti-timeout rules.
 
 ## Relative paths
 
