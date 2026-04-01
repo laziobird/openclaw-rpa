@@ -25,3 +25,6 @@ venv/
 
 # Full-resolution local master (optional); README uses compressed saucedemo-readme.mp4
 /saucedemo.mp4
+
+# Large GIF source; README uses compressed openclaw-rpa-lark-demo.mp4
+/rpa.gif

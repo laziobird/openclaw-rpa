@@ -4,45 +4,57 @@
 
 ## 演示视频
 
-先看一段 **Sauce Demo**（[saucedemo.com](https://www.saucedemo.com)）上的录屏，直观了解本技能在浏览器里如何完成 **登录 → 排序 → 加购 → 登出**。
 
-| 观看方式 | 链接 |
-|:--|:--|
-| **哔哩哔哩（推荐，高清）** | **[▶ 点击播放](https://www.bilibili.com/video/BV1YfXrBBE9u/)**（BV1YfXrBBE9u） |
-| **本仓库录屏** | **[▶ 在 GitHub 上播放](https://github.com/laziobird/openclaw-rpa/blob/main/saucedemo-readme.mp4)**（`saucedemo-readme.mp4`，页内即可点播放） |
+### Sauce 电商购物网站 浏览器录屏
 
-<p align="center">
-  <a href="https://www.bilibili.com/video/BV1YfXrBBE9u/"><img src="https://img.shields.io/badge/bilibili-播放演示-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white" alt="哔哩哔哩播放"></a>
-</p>
+**Sauce Demo**（[saucedemo.com](https://www.saucedemo.com)）录屏：**登录 → 按价格排序 → 加购最贵两件 → 登出**。展示从触发到录制、生成脚本的一条完整流程。
 
-**与视频一致的对话步骤**
+https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
 
-1. 发送 **`#rpa`** / **`#RPA`**，或消息中含 **`RPA`** / **「自动化机器人」**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
+**哔哩哔哩（Sauce 高清）**：[BV1YfXrBBE9u](https://www.bilibili.com/video/BV1YfXrBBE9u/)
+
+**对话步骤**
+
+1. 发送 **`#rpa`** / **`#RPA`** / **`#自动化机器人`**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
 2. 任务名示例：**`电商网站购物`**，或与已有脚本对齐如 **`电商网站购物V10`**（见 **`registry.json`**）。
 
-**本段任务提示词**
+**任务提示词**
 
 1. 访问 `www.saucedemo.com`，账号 **`standard_user`** / 密码 **`secret_sauce`** 登录。  
 2. 价格**从高到低**排序。  
 3. 将**最贵的两件**商品加入购物车。  
 4. **退出登录**。
 
-录制协议（`record-start`、`record-step`、`plan-set`、结束录制等）见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md)。回放：`运行：{任务名}` 或 `python3 rpa_manager.py run <任务名>`。
+录制协议（`record-start`、`record-step`、`plan-set`、`#结束录制` 等）见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md)。**先看有哪些已录好的 RPA 可用**：发 **`#rpa-list`**；**再跑其中一个**：`#rpa-run:{任务名}`（新对话）或 `#运行:{任务名}` / `python3 rpa_manager.py run <任务名>`（当前会话）。
+
+
+### OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 与定时执行
+
+录屏演示在飞书/Lark 与 **OpenClaw-bot** 对话中的典型用法：
+
+- **`#rpa-list`**：查看当前已注册、可执行的 RPA 任务；
+- **`#rpa-run:电商网站购物V10`**：在新对话中执行已录制的脚本；
+- **「一分钟后运行 #rpa-run:电商网站购物V10」** 等自然语言：在 OpenClaw + IM 侧预约或提醒稍后执行（具体以你的 OpenClaw 与机器人配置为准；脚本本身仍由 `rpa_manager.py run` 执行）。
+
+https://github.com/laziobird/openclaw-rpa/raw/main/openclaw-rpa-lark-demo.mp4
+
 
 ---
 
 > 借助 **AI**，把**常见网页**与**本机文件**相关操作录成 **可重复运行的 Playwright Python 脚本**。日常**直接跑脚本**，少调大模型——**省算力**，步骤**更稳**、少受幻觉影响。
 
-| | |
-|:---|:---|
-| **环境** | Python **3.8+**，需网络安装依赖与浏览器 |
-| **许可证** | [Apache 2.0](LICENSE) |
+
+|         |                             |
+| ------- | --------------------------- |
+| **环境**  | Python **3.8+**，需网络安装依赖与浏览器 |
+| **许可证** | [Apache 2.0](LICENSE)       |
+
 
 ---
 
 ## 快速安装（OpenClaw）
 
-技能目录：**`~/.openclaw/workspace/skills/openclaw-rpa`**
+技能目录：`**~/.openclaw/workspace/skills/openclaw-rpa`**
 
 ```bash
 mkdir -p ~/.openclaw/workspace/skills
@@ -58,14 +70,13 @@ python3 rpa_manager.py env-check
 
 **SSH 克隆：** `git@github.com:laziobird/openclaw-rpa.git`
 
-装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 **`SKILL.md`**。触发词见 **`SKILL.md`**（如 `#RPA`、`自动化机器人`）。
+装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 `**SKILL.md`**。触发词见 `**SKILL.md**`（如 `#RPA`、`#自动化机器人`）。
 
 ---
 
 ## 高级配置
 
-<details>
-<summary><b>手动安装 · 网关 Python · 路径 · 发布</b></summary>
+**手动安装 · 网关 Python · 路径 · 发布**
 
 ### 手动安装（不用 `install.sh`）
 
@@ -78,15 +89,15 @@ python -m playwright install chromium
 
 ### 网关实际调用的 Python
 
-`rpa_manager.py` 使用 **`sys.executable`**，该解释器必须已装 **Playwright**。若网关用系统 **`python3`**，请在同一环境装依赖，或把工具指向：
+`rpa_manager.py` 使用 `**sys.executable**`，该解释器必须已装 **Playwright**。若网关用系统 `**python3`**，请在同一环境装依赖，或把工具指向：
 
 `~/.openclaw/workspace/skills/openclaw-rpa/.venv/bin/python`
 
 ### 语言与 `config.json`
 
-- **`SKILL.md`** 中 **`localeConfig`** 指向 **`config.json`**
-- 若无 **`config.json`**，可按 **`SKILL.md`** 用 **`config.example.json`** 读 `locale`
-- 详见 **`LOCALE.md`**
+- `**SKILL.md**` 中 `**localeConfig**` 指向 `**config.json**`
+- 若无 `**config.json**`，可按 `**SKILL.md**` 用 `**config.example.json**` 读 `locale`
+- 详见 `**LOCALE.md**`
 
 ### `SKILL.*.md` 里的路径
 
@@ -106,7 +117,7 @@ python3 rpa_manager.py env-check
 
 `record-start` / `run` 在可能时会自动安装 Chromium。
 
-</details>
+
 
 ---
 
@@ -124,16 +135,16 @@ python3 rpa_manager.py run wikipedia
 
 ## 示例脚本（`rpa/`）
 
-| 脚本 | 说明 |
-|------|------|
-| `wikipedia.py` / `wiki.py` | 维基百科（英文） |
-| `豆瓣电影.py` | 中文界面示例（遵守站点规则） |
-| `电商网站购物v10.py` 等 | Sauce Demo 电商流程（与顶部 [演示视频](#演示视频) 同类） |
 
-更多说明见 **`examples/README.md`**。
+| 脚本                         | 说明                                    |
+| -------------------------- | ------------------------------------- |
+| `wikipedia.py` / `wiki.py` | 维基百科（英文）                              |
+| `豆瓣电影.py`                  | 中文界面示例（遵守站点规则）                        |
+| `电商网站购物v10.py` 等           | Sauce Demo 电商流程（与顶部 [演示视频](#演示视频) 同类） |
+
+
+更多说明见 `**examples/README.md**`。
 
 ---
 
-<p align="center">
-  <sub>Apache License 2.0 · 版权 © 2026 openclaw-rpa contributors</sub>
-</p>
+Apache License 2.0 · 版权 © 2026 openclaw-rpa contributors

@@ -1,8 +1,8 @@
 ---
 name: openclaw-rpa
 description: >
-  OpenClaw RPA: AI-assisted recording of browser and local-file actions into a Playwright Python script. Replay without the LLM each run—saves compute and keeps steps deterministic (vs. hallucinated ad-hoc automation). Triggers: "#automation robot", "#RPA", "#rpa", "automation robot", "Playwright automation".
-  中文触发：完整输入「#自动化机器人」「#RPA」「#rpa」或含「自动化机器人」「RPA」。
+  OpenClaw RPA: AI-assisted recording of browser and local-file actions into a Playwright Python script. Replay without the LLM each run—saves compute and keeps steps deterministic (vs. hallucinated ad-hoc automation). Triggers: "#automation robot", "#RPA", "#rpa", "#rpa-list", "Playwright automation"; list recorded tasks: "#rpa-list"; run a saved script: "#rpa-run:{task}" or "run:{task}".
+  中文触发：「#自动化机器人」「#RPA」「#rpa」「#rpa-list」；查看可用任务「#rpa-list」，执行已录制脚本：「#rpa-run:任务名」或「#运行:任务名」。
   Locale: read config.json (or config.example.json if config.json is missing) → SKILL.zh-CN.md or SKILL.en-US.md.
 metadata:
   openclaw:

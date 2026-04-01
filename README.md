@@ -4,30 +4,38 @@ English | **[中文](README.zh-CN.md)**
 
 ## Demo video
 
-Watch a short **Sauce Demo** ([saucedemo.com](https://www.saucedemo.com)) recording: **sign in → sort → add to cart → sign out**.
+### Sauce Demo (browser recording)
 
-| Where | Link |
-|:--|:--|
-| **Bilibili (recommended)** | **[▶ Play](https://www.bilibili.com/video/BV1YfXrBBE9u/)** (BV1YfXrBBE9u) |
-| **In this repo** | **[▶ Play on GitHub](https://github.com/laziobird/openclaw-rpa/blob/main/saucedemo-readme.mp4)** (`saucedemo-readme.mp4`) |
+**Sauce Demo** ([saucedemo.com](https://www.saucedemo.com)): **sign in → sort by price → add two most expensive → sign out**.  
+Shows the full flow from trigger through recording to a generated script.
 
-<p align="center">
-  <a href="https://www.bilibili.com/video/BV1YfXrBBE9u/"><img src="https://img.shields.io/badge/bilibili-Watch_demo-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white" alt="Watch on Bilibili"></a>
-</p>
+https://github.com/laziobird/openclaw-rpa/raw/main/saucedemo-readme.mp4
 
-**Steps in the video (conversation)**
+**Bilibili (Sauce, HD):** [BV1YfXrBBE9u](https://www.bilibili.com/video/BV1YfXrBBE9u/)
 
-1. Send **`#rpa`** / **`#RPA`**, or a message containing **`RPA`** / **“automation robot”** — see [**SKILL.md**](SKILL.md) and [**SKILL.en-US.md** — Trigger detection](SKILL.en-US.md#trigger-detection).
+**Sauce recording (`saucedemo-readme.mp4`) — steps in the video**
+
+1. Send **`#rpa`** / **`#RPA`** / **`#automation robot`** — see [**SKILL.md**](SKILL.md) and [**SKILL.en-US.md** — Trigger detection](SKILL.en-US.md#trigger-detection).
 2. Task name examples: **`电商网站购物`**, or match an existing script like **`电商网站购物V10`** (see **`registry.json`**).
 
-**Task prompt**
+**Task prompt (Sauce segment)**
 
 1. Open `www.saucedemo.com`, sign in **`standard_user`** / **`secret_sauce`**.  
 2. Sort **price high → low**.  
 3. Add the **two most expensive** items to the cart.  
 4. **Log out**.
 
-Full protocol: [**SKILL.en-US.md**](SKILL.en-US.md) (ONBOARDING, RECORDING). Replay: `run:{task}` or `python3 rpa_manager.py run <name>`.
+### OpenClaw + Feishu/Lark: `#rpa-list`, `#rpa-run`, and scheduled run
+
+Screen recording of a typical chat with **OpenClaw-bot** on Feishu/Lark:
+
+- **`#rpa-list`** — list registered RPA tasks you can run;
+- **`#rpa-run:电商网站购物V10`** — run a saved script from a new chat;
+- A line like **「One minute later run `#rpa-run:电商网站购物V10`」** — schedule or remind to run later via OpenClaw + IM (exact behavior depends on your setup; execution still goes through **`rpa_manager.py run`**).
+
+https://github.com/laziobird/openclaw-rpa/raw/main/openclaw-rpa-lark-demo.mp4
+
+Full protocol: [**SKILL.en-US.md**](SKILL.en-US.md) (ONBOARDING, RECORDING). **See what recorded RPAs exist:** **`#rpa-list`**. **Run one:** `#rpa-run:{task}` (new chat) or `run:{task}` / `python3 rpa_manager.py run <name>` (same chat).
 
 ---
 
@@ -58,7 +66,7 @@ python3 rpa_manager.py env-check
 
 **SSH clone:** `git@github.com:laziobird/openclaw-rpa.git`
 
-After install, **start a new OpenClaw chat** (or reload skills) so the agent reads **`SKILL.md`**. Triggers and keywords: **`SKILL.md`** (e.g. `#RPA`, “automation robot”).
+After install, **start a new OpenClaw chat** (or reload skills) so the agent reads **`SKILL.md`**. Triggers and keywords: **`SKILL.md`** (e.g. `#RPA`, `#automation robot`).
 
 ---
 

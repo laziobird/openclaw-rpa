@@ -15,6 +15,11 @@ With **AI assistance**, this skill **records** actions on common websites and (w
 
 The output is **ordinary Python**: you may still add **local file** helpers after **`record-end`** (`pathlib` / `shutil` / `open()`, or **`extract_text`** during recording)—browser-only, file-only, or both.
 
+### Running recorded scripts (what exists, then what to run)
+
+- **What’s available:** Send **`#rpa-list`**. It prints **recorded, registered** RPA task names you can run (same as `registry.json` / `rpa_manager.py list`). **Use this first** if you don’t know the exact name.
+- **Run one of them:** Copy a name from that list, then send **`#rpa-run:{task name}`** (works well in a **new chat** with no prior context) or **`run:{task name}`** (**same chat**). Both **execute the saved script again**—they do **not** start a new recording.
+
 ## Scope (details)
 
 **In the browser** — Clicks, typing, selects, scroll, wait, screenshots; multi-step flows are first-class. Extracting page text is **one** option.
@@ -44,16 +49,24 @@ If logs show `error=LLM request timed out`, `model=gemini-...`, `provider=google
 
 ## Trigger detection
 
-On each user message, **check first**:
+On each user message, **check in this order** (**first match wins**; do not skip order or `#rpa-list` may be mistaken for ONBOARDING because it contains `#rpa`):
 
-| Condition | State |
-|-----------|--------|
-| Message contains **#automation robot** OR **#RPA** OR **#rpa** (hashtag form), OR plain **automation robot** / **RPA** (case-insensitive for RPA) | ONBOARDING |
-| Message matches `run:{task name}` (e.g. `run:MyTask`, optional spaces) | RUN |
+| Order | Condition | State |
+|:-----:|-----------|--------|
+| 1 | Message is a **RUN** (see table below) | RUN |
+| 2 | After trim, message **equals** `#rpa-list` (**case-insensitive**, e.g. `#RPA-LIST`) | LIST |
+| 3 | Message contains **#automation robot** OR **#RPA** OR **#rpa** (case-insensitive for `#RPA` / `#rpa`) | ONBOARDING |
 
 Intercept and handle these; do not run the raw user task outside this skill.
 
-> **`zh-CN` locale:** use the triggers in [SKILL.zh-CN.md](SKILL.zh-CN.md) (`自动化机器人`, `RPA`, `运行：{任务名}`).
+**RUN triggers (order 1):**
+
+| Form | Notes |
+|------|--------|
+| `#rpa-run:{task name}` | **Run in a new chat** (no reliance on this thread): after trim, message **starts with** `#rpa-run:` (**case-insensitive**, e.g. `#RPA-RUN:`). **After the first colon** to **end of line** is `{task name}` (**must match** a name from `#rpa-list`, trimmed). |
+| `run:{task name}` | **Run in this chat:** `run:` then optional spaces, then task name to end of line (trimmed; same name rules). |
+
+> **`zh-CN` locale:** use [SKILL.zh-CN.md](SKILL.zh-CN.md) (`#自动化机器人`, `#RPA` / `#rpa`, `#rpa-list`, `#rpa-run:`, `#运行:`).
 
 ---
 
@@ -63,7 +76,8 @@ Intercept and handle these; do not run the raw user task outside this skill.
 IDLE ──trigger──► ONBOARDING ──task name──► RECORDING ──end recording──► GENERATING ──► IDLE
                                         │abort
                                         └──────────────────────────────► IDLE
-IDLE ──"run:{task}"──► RUN ──► IDLE
+IDLE ──"#rpa-run:{task}" / "run:{task}"──► RUN ──► IDLE
+IDLE ──"#rpa-list"──► LIST ──► IDLE
 ```
 
 ---
@@ -333,7 +347,7 @@ Execute in order — **do not skip steps**:
    • [If login was involved, remind user to log in before replay]
    • [Other caveats inferred from the recording]
 
-   Next time say "run:{task name}" to replay.
+   To run this RPA later: if unsure what’s registered, send **`#rpa-list`** first to see **which recorded tasks are available**; then **`#rpa-run:{task name}`** (new chat) or **`run:{task name}`** (same chat).
    ```
 
 4. **Do not LLM-rewrite the generated script** (agents must obey)
@@ -345,7 +359,9 @@ Execute in order — **do not skip steps**:
 
 ## RUN
 
-Trigger: user message matches `run:{task name}`.
+Trigger: user message matches the **RUN** table above (`#rpa-run:` or `run:`); parsed `{task name}` is passed to `rpa_manager.py run` (**must match a registered name**; if unclear, user should **`#rpa-list`** first).
+
+Meaning: **run an already-recorded script again** (repeat the same steps)—**not** start a new recording.
 
 1. Reply: "▶️ Running 「{task name}」…"
 2. Run:
@@ -361,6 +377,21 @@ Trigger: user message matches `run:{task name}`.
    ```bash
    python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list
    ```
+
+---
+
+## LIST
+
+Trigger: **order 2** above — the whole message is only `#rpa-list` (case-insensitive).
+
+Meaning: answer **“which recorded RPA scripts can I use right now?”** — same output as `rpa_manager.py list` / `registry.json`.
+
+1. Reply: "📋 Listing recorded RPA tasks you can run…"
+2. Run:
+   ```bash
+   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list
+   ```
+3. Show **stdout** (light formatting OK); close with a short note that the names listed are **what’s available to run now**, and to execute one use **`#rpa-run:{task name}`** (new chat) or **`run:{task name}`** (this chat).
 
 ---
 
@@ -427,8 +458,14 @@ Agent:
 User: end recording
 Agent: ✨ Generated: rpa/daily_news_scrape.py (5 steps, real recording, selectors verified)
 
+User: #rpa-run:Daily news scrape
+Agent: ▶️ Running… ✅ Finished.
+
 User: run:Daily news scrape
 Agent: ▶️ Running… ✅ Finished.
+
+User: #rpa-list
+Agent: 📋 Listing… (shows `rpa_manager.py list` output)
 ```
 
 ---
@@ -446,7 +483,7 @@ Agent: ▶️ Running… ✅ Finished.
   `record-start <task>` | `record-step '<json>'` | `record-status` | `record-end [--abort]`
 
   **General:**  
-  `run <task>` | `list`
+  `run <task>` | `list` (in chat, **`#rpa-list`** triggers LIST)
 
-  **Legacy (compat):**  
+  **Legacy:**  
   `init <task>` | `add --proof <file> '<json>'` | `generate` | `status` | `reset`

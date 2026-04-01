@@ -1,6 +1,6 @@
 ---
 name: openclaw-rpa
-description: 借助 AI 将常见网页与本机文件操作录制成可重复运行的 RPA（Playwright Python）；日常执行跑脚本、少依赖模型，省算力且步骤稳定，降低幻觉风险。触发：「自动化机器人」「RPA」等。Use when user says 自动化机器人, RPA, 录制自动化, 生成脚本, Playwright automation, or asks to automate repetitive browser/file tasks.
+description: 借助 AI 将常见网页与本机文件操作录制成可重复运行的 RPA（Playwright Python）；日常执行跑脚本、少依赖模型，省算力且步骤稳定，降低幻觉风险。触发：「#自动化机器人」「#RPA」「#rpa」「#rpa-list」；查看可用任务「#rpa-list」，执行：「#rpa-run:任务名」或「#运行:任务名」。Use when user says #自动化机器人, #RPA, #rpa, #rpa-list, 录制自动化, 生成脚本, Playwright automation, or asks to automate repetitive browser/file tasks.
 metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 ---
 
@@ -15,6 +15,11 @@ metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 生成物为普通 Python：录制中可用 **`extract_text`**；**`record-end`** 后可按需追加 **`pathlib` / `shutil` / `open()`**，见 [playwright-templates.md](playwright-templates.md)。浏览器与本地文件可只做其一，也可组合。
 
 **不强调** — 重型 ETL、数据库或大型系统运维；请用专门工具。
+
+### 运行已录制的任务（先看有哪些，再跑哪一个）
+
+- **有哪些可以跑**：发 **`#rpa-list`**，会列出 **当前已录制、已登记**、可直接执行的 RPA 任务名（与 `registry.json` / `rpa_manager.py list` 一致）。不知道名字时**先发这一条**。
+- **跑其中一个**：从列表里复制 **任务名**，发 **`#rpa-run:任务名`**（适合 **新开一条对话**，不依赖当前聊天上下文）或 **`#运行:任务名`**（**还在当前会话里**时直接执行）。二者都是「用已生成好的脚本再跑一遍」，不是重新录制。
 
 ### 说明性例子（非穷举）
 
@@ -37,12 +42,20 @@ metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 
 ## 触发检测
 
-每次收到用户消息时，**优先**检查：
+每次收到用户消息时，**按下表顺序**检查（**先命中先执行**，后续不再判断；勿跳过顺序，否则 `#rpa-list` 会因含 `#rpa` 而误判为 ONBOARDING）：
 
-| 条件 | 进入状态 |
-|------|---------|
-| 消息含 `自动化机器人` 或 `RPA` | ONBOARDING |
-| 消息匹配 `运行：{任务名}` | RUN |
+| 顺序 | 条件 | 进入状态 |
+|:----:|------|---------|
+| 1 | 消息为 **RUN**（见下表） | RUN |
+| 2 | 消息**去掉首尾空白**后**等于** `#rpa-list`（**不区分大小写**，如 `#RPA-LIST`） | LIST |
+| 3 | 消息含 `#自动化机器人` 或 `#RPA` / `#rpa`（不区分大小写） | ONBOARDING |
+
+**RUN 触发（命中顺序 1 即进入 RUN）：**
+
+| 形式 | 说明 |
+|------|------|
+| `#rpa-run:{任务名}` | **在新对话里执行**（不依赖当前会话上下文）：消息**去掉首尾空白**后以 `#rpa-run:` 开头（**不区分大小写**，如 `#RPA-RUN:`）。**第一个英文冒号 `:` 之后**到**行尾**为 `{任务名}`（须与 `#rpa-list` 中某一项一致，首尾去空白）。 |
+| `#运行:{任务名}` | **在当前会话里执行**：消息**去掉首尾空白**后以 `#运行:` 开头。**第一个英文冒号 `:` 之后**到**行尾**为任务名（同上，须为已登记任务）。 |
 
 命中即拦截，不要直接执行原始任务。
 
@@ -51,10 +64,11 @@ metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 ## 状态机
 
 ```
-IDLE ──触发词──► ONBOARDING ──任务名──► RECORDING ──结束录制──► GENERATING ──► IDLE
-                                           │放弃
+IDLE ──触发词──► ONBOARDING ──任务名──► RECORDING ──#结束录制──► GENERATING ──► IDLE
+                                           │#放弃
                                            └──────────────────────────────► IDLE
-IDLE ──"运行：{任务名}"──► RUN ──► IDLE
+IDLE ──"#rpa-run:{任务名}" / "#运行:{任务名}"──► RUN ──► IDLE
+IDLE ──"#rpa-list"──► LIST ──► IDLE
 ```
 
 ---
@@ -69,15 +83,15 @@ IDLE ──"运行：{任务名}"──► RUN ──► IDLE
 在 AI 协助下，把你在常见网站上的操作、以及需要的本机文件步骤，录制成可反复执行的 RPA 脚本。
 之后日常直接跑脚本即可，不必每次让模型现场点网页——省算力，步骤按录制执行，少受幻觉影响。
 
-工作方式：
+工作方式:
 1. 告诉我任务名称
 2. 下达指令 → 我在浏览器里真实执行，截图给你确认
-3. 说"结束录制" → 我把录制步骤编译成 RPA 脚本
+3. 说"#结束录制" → 我把录制步骤编译成 RPA 脚本
 
-常用指令：
-• 输入"结束录制" → 生成可独立运行的 Playwright 脚本
-• 输入"放弃"     → 关闭浏览器，清空本次录制
-• 多步任务拆成计划后，要进入下一步时可只发：**继续**、**1** 或 **next**（与「好」「下一步」「ok」一样有效）
+常用指令:
+• 输入"#结束录制" → 生成可独立运行的 Playwright 脚本
+• 输入"#放弃"     → 关闭浏览器，清空本次录制
+• 多步任务拆成计划后，要进入下一步时可只发:**#继续**、**1** 或 **next**（与「#好」「#下一步」「ok」一样有效）
 
 请告诉我，你要录制的第一个任务名称是什么？
 ```
@@ -95,7 +109,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-start "{
 
 等命令输出 `✅ Recorder 已就绪` 后，回复：
 ```
-✅ 已进入录制模式：「{任务名}」
+✅ 已进入录制模式: 「{任务名}」
 🖥️  Chrome 窗口已打开，请注视屏幕——接下来每一步操作都将在这个浏览器中真实执行。
 截图将自动保存，你可以随时核对。
 请下达指令，为你拆解任务
@@ -119,13 +133,13 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-start "{
 3. 执行 **第 1 步**（仅此一步，不继续）
 4. 固定结尾：
    ```
-   📍 进度：1/{N} 步已完成
+   📍 进度: 1/{N} 步已完成
    ✅ [步骤描述]
-   📸 截图：{path}
-   请确认截图，然后说「继续」或「1」或「next」执行第 2/{N} 步（见下方快捷确认词）。
+   📸 截图: {path}
+   请确认截图，然后说「#继续」或「1」或「next」执行第 2/{N} 步（见下方快捷确认词）。
    ```
 
-> **快捷确认词（均视为「继续执行下一步」）：** `继续`、`1`、`next`、`好`、`下一步`、`ok`（`next` 不区分大小写）。用户只打 **`1`** 或 **`next`** 即可，无需完整句子。
+> **快捷确认词（均视为「继续执行下一步」）：** `#继续`、`1`、`next`、`#好`、`#下一步`、`ok`（`next` 不区分大小写）。用户只打 **`1`** 或 **`next`** 即可，无需完整句子。
 
 **后续轮（收到上述快捷确认词之一时）：**
 
@@ -141,7 +155,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-start "{
 4. 若还有下一步 → 输出进度，等待用户确认；若全部完成 → 输出：
    ```
    🎉 所有 {N} 步已全部完成！
-   可以说「结束录制」生成 RPA 脚本，或继续描述更多操作。
+   可以说「#结束录制」生成 RPA 脚本，或继续描述更多操作。
    ```
 
 > **为什么这么设计：** 每次 LLM 请求只运行 2-3 个工具调用；单步 `record-step` 等待录制器回写结果最多 **120s**（与 `rpa_manager` 轮询一致），仍须拆解多步以免总耗时长触发 "LLM request timed out"。
@@ -276,9 +290,9 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
 #### 第四步：向用户汇报（固定格式）
 ```
 ✅ [步骤 N] {context}
-📸 截图：{screenshot_path}（可在屏幕上直接看到浏览器变化）
-🔗 当前 URL：{url}
-请确认操作是否符合预期，然后回复「继续」「1」或「next」进入下一步。
+📸 截图: {screenshot_path}（可在屏幕上直接看到浏览器变化）
+🔗 当前 URL: {url}
+请确认操作是否符合预期，然后回复「#继续」「1」或「next」进入下一步。
 ```
 
 #### 第五步：若操作失败
@@ -290,13 +304,13 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
 
 ### 状态转换检测（每条消息都检查）
 
-- 收到 `结束录制` → 进入 **GENERATING**
-- 收到 `放弃` → 执行：
+- 收到 `#结束录制` → 进入 **GENERATING**
+- 收到 `#放弃` → 执行：
   ```bash
   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-end --abort
   ```
   → 回到 IDLE
-- 收到 `继续` / `1` / `next` / `好` / `下一步` / `ok` → 继续执行多步计划的**当前步骤**（见上方「防超时规则」与「快捷确认词」）
+- 收到 `#继续` / `1` / `next` / `#好` / `#下一步` / `ok` → 继续执行多步计划的**当前步骤**（见上方「防超时规则」与「快捷确认词」）
 
 ---
 
@@ -316,15 +330,15 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
    ```
    ✨ RPA 脚本生成成功！（基于真实录制，选择器均经过浏览器验证）
    
-   📄 文件：~/.openclaw/workspace/skills/openclaw-rpa/rpa/{filename}.py
+   📄 文件: ~/.openclaw/workspace/skills/openclaw-rpa/rpa/{filename}.py
    📋 共录制 {N} 个步骤
-   📸 截图目录：~/.openclaw/workspace/skills/openclaw-rpa/recorder_session/screenshots/
+   📸 截图目录: ~/.openclaw/workspace/skills/openclaw-rpa/recorder_session/screenshots/
    
-   已知限制：
+   已知限制:
    • [如涉及登录，提醒用户手动登录后再运行]
    • [其他从录制内容识别出的注意事项]
    
-   下次只需说"运行：{任务名}"即可重放。
+   以后执行这个 RPA：不确定有哪些任务时先发 **`#rpa-list`** 查看 **当前可用的已录制任务**；再发 **`#rpa-run:{任务名}`**（新开对话）或 **`#运行:{任务名}`**（仍在本对话）。
    ```
 
 4. **禁止用 LLM 全文重写已生成脚本**（Agent 必须遵守）  
@@ -336,7 +350,9 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
 
 ## RUN 状态
 
-触发：用户消息匹配 `运行：{任务名}`。
+触发：用户消息满足上表 **`#rpa-run:`** 或 **`#运行:`** 规则；解析出的 `{任务名}` 传入 `rpa_manager.py run`（**须与已登记任务名一致**；不确定时让用户先 **`#rpa-list`**）。
+
+含义：**执行一条已录制好的 RPA 脚本**（再次跑同一套步骤），不是开始新录制。
 
 1. 回复："▶️ 正在运行「{任务名}」…"
 2. 执行：
@@ -345,13 +361,28 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
    ```
 3. 捕获输出，完成后汇报结果摘要：
    ```
-   ✅ 运行完毕：「{任务名}」
+   ✅ 运行完毕: 「{任务名}」
    [stdout 摘要]
    ```
 4. 若返回错误 "未找到任务"，列出当前可用任务：
    ```bash
    python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list
    ```
+
+---
+
+## LIST 状态
+
+触发：见上表 **顺序 2**（整条消息仅为 `#rpa-list`，不区分大小写）。
+
+含义：回答用户 **「当前有哪些已录制、可以使用的 RPA」** —— 与 `rpa_manager.py list` / `registry.json` 一致。
+
+1. 回复："📋 正在列出当前可用的已录制 RPA 任务…"
+2. 执行：
+   ```bash
+   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list
+   ```
+3. 将 **stdout** 展示给用户（可适度排版）；末尾用一两句话说明：上面列出的就是 **现在能直接运行的任务名**；要跑其中某一个，发 **`#rpa-run:任务名`**（新对话）或 **`#运行:任务名`**（当前对话）。
 
 ---
 
@@ -378,7 +409,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
 ## 示例交互
 
 ```
-用户：自动化机器人
+用户：#自动化机器人
 系统：🤖 OpenClaw RPA 实验室已就绪 ... 请告诉我任务名称？
 
 用户：每日资讯采集
@@ -389,9 +420,9 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
   （多步指令检测：3 个子任务，触发拆解）
   （执行 plan-set '["打开目标网站", "搜索关键词 AI", "提取前5条标题存文件"]'）
   （执行第 1 步：record-step goto）→ 截图
-  📍 进度：1/3 步已完成 ✅ 打开目标网站
-  📸 截图：step_01_...png
-  请回复「继续」「1」或「next」执行第 2/3 步：搜索关键词 AI
+  📍 进度: 1/3 步已完成 ✅ 打开目标网站
+  📸 截图: step_01_...png
+  请回复「#继续」「1」或「next」执行第 2/3 步: 搜索关键词 AI
 
 用户：1
 系统：
@@ -400,9 +431,9 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
   （record-step fill input[name="q"] AI）
   （record-step press Enter）
   （plan-next）
-  📍 进度：2/3 步已完成 ✅ 搜索关键词 AI
-  📸 截图：step_03_...png
-  请回复「继续」「1」或「next」执行第 3/3 步：提取前5条标题
+  📍 进度: 2/3 步已完成 ✅ 搜索关键词 AI
+  📸 截图: step_03_...png
+  请回复「#继续」「1」或「next」执行第 3/3 步: 提取前5条标题
 
 用户：next
 系统：
@@ -413,13 +444,19 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
   （record-step extract_text [data-testid="results"] h3 a titles.txt limit=5）
   （plan-next → 全部完成）
   🎉 所有 3 步已全部完成！titles.txt 已写入桌面。
-  可以说「结束录制」生成 RPA 脚本。
+  可以说「#结束录制」生成 RPA 脚本。
 
-用户：结束录制
+用户：#结束录制
 系统：✨ 生成成功！rpa/mei_ri_zi_xun_cai_ji.py（5 步，真实录制，选择器均经浏览器验证）
 
-用户：运行：每日资讯采集
+用户：#rpa-run:每日资讯采集
 系统：▶️ 正在运行... ✅ 运行完毕。
+
+用户：#运行:每日资讯采集
+系统：▶️ 正在运行... ✅ 运行完毕。
+
+用户：#rpa-list
+系统：📋 正在列出…（输出 `rpa_manager.py list` 的注册任务列表）
 ```
 ---
 
@@ -436,7 +473,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
   `rpa_manager.py record-start <task>` | `record-step '<json>'` | `record-status` | `record-end [--abort]`
 
   **通用：**
-  `rpa_manager.py run <task>` | `list`
+  `rpa_manager.py run <task>` | `list`（对话中也可发 **`#rpa-list`** 触发 LIST 状态）
 
-  **Legacy（兼容保留）：**
+  **Legacy：**
   `rpa_manager.py init <task>` | `add --proof <file> '<json>'` | `generate` | `status` | `reset`

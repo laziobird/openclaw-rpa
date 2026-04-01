@@ -1,6 +1,6 @@
 # pip install playwright && playwright install chromium
-# 任务：TestV2
-# 录制时间：2026-03-29 10:36:20
+# 任务：电商网站购物V10
+# 录制时间：2026-03-31 11:20:50
 # 由 OpenClaw RPA Recorder（headed 真实录制）生成 — 可脱离 OpenClaw 独立运行
 
 import asyncio
@@ -60,57 +60,80 @@ async def run():
         page.set_default_timeout(CONFIG["timeout"])
 
         try:
-            # ── 步骤 1：打开雅虎财经香港
+            # ── 步骤 1：访问网站 https://www.saucedemo.com
             try:
-                await page.goto('https://hk.finance.yahoo.com', wait_until="domcontentloaded")
+                await page.goto('https://www.saucedemo.com', wait_until="domcontentloaded")
                 await page.wait_for_timeout(CONFIG["spa_settle_ms"])
             except Exception:
                 await page.screenshot(path="step_1_error.png")
                 raise
 
-            # ── 步骤 2：在搜索框输入NVDA
+            # ── 步骤 2：填写账号 standard_user
             try:
-                await page.locator('#ybar-sbq').first.fill('NVDA')
+                await page.locator('#user-name').first.fill('standard_user')
             except Exception:
                 await page.screenshot(path="step_2_error.png")
                 raise
 
-            # ── 步骤 3：点击搜索按钮
+            # ── 步骤 3：填写密码 secret_sauce
             try:
-                await page.locator('#ybar-search').first.click()
-                await page.wait_for_load_state("domcontentloaded")
-                await page.wait_for_timeout(800)
+                await page.locator('#password').first.fill('secret_sauce')
             except Exception:
                 await page.screenshot(path="step_3_error.png")
                 raise
 
-            # ── 步骤 4：向下滚动触发新闻列表懒加载
+            # ── 步骤 4：点击登录按钮
             try:
-                await page.evaluate("window.scrollBy(0, 1000)")
-                await page.wait_for_timeout(600)
+                await page.locator('#login-button').first.click()
+                await page.wait_for_load_state("domcontentloaded")
+                await page.wait_for_timeout(800)
             except Exception:
                 await page.screenshot(path="step_4_error.png")
                 raise
 
-            # ── 步骤 5：继续向下滚动查找新闻区块
+            # ── 步骤 5：按价格从高到低排序
             try:
-                await page.evaluate("window.scrollBy(0, 1500)")
-                await page.wait_for_timeout(600)
+                await page.locator('[data-test="product-sort-container"]').first.select_option('hilo')
+                await page.wait_for_load_state("domcontentloaded")
+                await page.wait_for_timeout(800)
             except Exception:
                 await page.screenshot(path="step_5_error.png")
                 raise
 
-            # ── 步骤 6：提取前 5 条新闻标题存至桌面
+            # ── 步骤 6：添加价格最高的第一件商品到购物车
             try:
-                _sel = '#nimbus-app li'
-                _lim = 5
-                await _wait_for_content(page, _sel)
-                _texts = await page.evaluate(_EXTRACT_JS, [_sel, _lim])
-                _out = CONFIG["output_dir"] / 'news.txt'
-                _out.write_text("\n".join(_texts), encoding="utf-8")
-                print(f"已提取 {{len(_texts)}} 条，写入 {{_out}}")
+                await page.locator('#add-to-cart-sauce-labs-fleece-jacket').first.click()
+                await page.wait_for_load_state("domcontentloaded")
+                await page.wait_for_timeout(800)
             except Exception:
                 await page.screenshot(path="step_6_error.png")
+                raise
+
+            # ── 步骤 7：添加价格最高的第二件商品到购物车
+            try:
+                await page.locator('#add-to-cart-sauce-labs-backpack').first.click()
+                await page.wait_for_load_state("domcontentloaded")
+                await page.wait_for_timeout(800)
+            except Exception:
+                await page.screenshot(path="step_7_error.png")
+                raise
+
+            # ── 步骤 8：打开左侧菜单
+            try:
+                await page.locator('#react-burger-menu-btn').first.click()
+                await page.wait_for_load_state("domcontentloaded")
+                await page.wait_for_timeout(800)
+            except Exception:
+                await page.screenshot(path="step_8_error.png")
+                raise
+
+            # ── 步骤 9：点击退出登录
+            try:
+                await page.locator('#logout_sidebar_link').first.click()
+                await page.wait_for_load_state("domcontentloaded")
+                await page.wait_for_timeout(800)
+            except Exception:
+                await page.screenshot(path="step_9_error.png")
                 raise
 
         except PlaywrightTimeout as e:
