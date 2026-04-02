@@ -23,6 +23,27 @@ https://github.com/user-attachments/assets/965fbecc-a0fc-4795-9f63-a5ef126f97f8
 3. Add the **two most expensive** items to the cart.  
 4. **Log out**.
 
+<a id="yahoo-finance-nvda-demo"></a>
+
+### Yahoo Finance (NVDA news) — browser recording
+
+**Yahoo Finance** ([finance.yahoo.com](https://finance.yahoo.com)): **search a symbol → open the quote page → switch to the News tab → capture the top headlines to a text file on the Desktop**. This case shows the same end-to-end path as the Sauce demo—trigger, record, synthesize a Playwright script—for a finance/news workflow.
+
+**Video (GitHub playback):** *URL reserved — after you upload the screen recording (e.g. to a GitHub issue comment or release asset), replace the link below with the `https://github.com/user-attachments/assets/…` playback URL.*
+
+https://github.com/user-attachments/assets/00000000-0000-0000-0000-000000000000
+
+**Recording — steps in the video**
+
+1. Send **`#rpa`** / **`#RPA`** / **`#automation robot`** — see [**SKILL.md**](SKILL.md) and [**SKILL.en-US.md** — Trigger detection](SKILL.en-US.md#trigger-detection).
+2. Task name example: align with a registered script such as **`YahooNew`** (see **`registry.json`** → `yahoonew.py`).
+
+**Task prompt (Yahoo Finance segment)**
+
+1. Open `https://finance.yahoo.com/`, search for **NVDA**, and go to the quote page (e.g. `https://finance.yahoo.com/quote/NVDA/`).
+2. In the row of tabs under the stock price (same row as **Summary**), click **News** for this symbol—the tab next to **Summary**. Wait until the news list has loaded.
+3. Save the **top 5** news headlines (**title text only**) to **`YahooNews.txt`** on the **Desktop**.
+
 ### OpenClaw + Feishu/Lark: `#rpa-list`, `#rpa-run`, and scheduled run
 
 Screen recording of a typical chat with **OpenClaw-bot** on Feishu/Lark:
@@ -138,6 +159,7 @@ Recorder: `record-start` → `record-step` → `record-end` (see `rpa_manager.py
 | `wikipedia.py` / `wiki.py` | Wikipedia (English) |
 | `豆瓣电影.py` | Chinese UI demo (follow site rules) |
 | `电商网站购物v10.py` (and related) | Sauce Demo flow (same as the [demo video](#demo-video) at the top) |
+| `yahoonew.py` (`YahooNew` in **`registry.json`**) | Yahoo Finance quote → **News** tab → top 5 headlines to Desktop (see [Yahoo Finance demo](#yahoo-finance-nvda-demo)) |
 
 More notes: **`examples/README.md`**.
 

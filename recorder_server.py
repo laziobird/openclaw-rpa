@@ -48,6 +48,17 @@ _UA = (
     "Chrome/124.0.0.0 Safari/537.36"
 )
 
+# 与 _build_final_script 生成脚本中的 _EXTRACT_JS 一致。
+# 裸标签选择器（如 h3、无 # . [ 空格）在存在 <main> / [role=main] 时只在该区域内匹配，
+# 避免 Yahoo 等站顶栏 mega-menu 的 h3 先于正文被 slice(0,n) 取走。
+_EXTRACT_JS_MIN = (
+    '([s,n])=>{const r=document.querySelector("main")||document.querySelector(\'[role="main"]\');'
+    'const bare=/^[a-zA-Z][a-zA-Z0-9-]*$/.test(s)&&s.indexOf("#")<0&&s.indexOf(".")<0&&'
+    's.indexOf("[")<0&&s.indexOf(" ")<0;'
+    'const sc=bare&&r?r:document;return Array.from(sc.querySelectorAll(s)).slice(0,n)'
+    '.map(e=>(e.textContent||"").replace(/\\s+/g," ").trim()).filter(Boolean)}'
+)
+
 
 # ── Code generation helpers ──────────────────────────────────────────────────
 
@@ -276,15 +287,7 @@ async def _do_action(page, data: dict, step_n: int, shots_dir: Path) -> dict:
 
             # Single atomic JS call — immune to mid-flight page re-renders
             limit_n = limit or 9999
-            texts = await page.evaluate(
-                """([sel, lim]) => {
-                    return Array.from(document.querySelectorAll(sel))
-                        .slice(0, lim)
-                        .map(el => (el.textContent || '').replace(/\s+/g, ' ').trim())
-                        .filter(Boolean);
-                }""",
-                [target, limit_n],
-            )
+            texts = await page.evaluate(_EXTRACT_JS_MIN, [target, limit_n])
 
             # field / field_name = short label for output; else fall back to context
             field_label = (
@@ -347,11 +350,20 @@ async def _do_action(page, data: dict, step_n: int, shots_dir: Path) -> dict:
 
         elif action == "scroll":
             px = int(value) if value else 500
-            await page.evaluate(f"window.scrollBy(0, {px})")
+            try:
+                await page.wait_for_load_state("domcontentloaded", timeout=10_000)
+            except Exception:
+                pass
+            vp = page.viewport_size
+            if vp:
+                await page.mouse.move(vp["width"] // 2, vp["height"] // 2)
+            else:
+                await page.mouse.move(720, 450)
+            await page.mouse.wheel(0, float(px))
             await page.wait_for_timeout(600)   # wait for lazy-load trigger
             code_block = _step_code(step_n, context, [
-                f'await page.evaluate("window.scrollBy(0, {px})")',
-                'await page.wait_for_timeout(600)',
+                f"await _scroll_window(page, {px})",
+                "await page.wait_for_timeout(600)",
             ])
 
         elif action == "scroll_to":
@@ -457,6 +469,7 @@ def _build_final_script(task_name: str, code_blocks: list[str]) -> str:
     ts    = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     steps = "\n\n".join(code_blocks) if code_blocks else "            pass  # 无录制步骤"
     fmt_src = inspect.getsource(_format_extract_section)
+    extract_js_repr = repr(_EXTRACT_JS_MIN)
     return f"""\
 # pip install playwright && playwright install chromium
 # 任务：{task_name}
@@ -486,11 +499,7 @@ _UA = (
 
 {fmt_src}
 
-_EXTRACT_JS = (
-    "([s,n])=>{{return Array.from(document.querySelectorAll(s))"
-    ".slice(0,n).map(e=>(e.textContent||'')"
-    ".replace(/\\\\s+/g,' ').trim()).filter(Boolean)}}"
-)
+_EXTRACT_JS = {extract_js_repr}
 
 
 async def _wait_for_content(page, selector: str) -> None:
@@ -499,6 +508,20 @@ async def _wait_for_content(page, selector: str) -> None:
         await page.wait_for_selector(selector, timeout=CONFIG["content_wait"])
     except Exception:
         pass  # 元素未出现也继续，evaluate 会返回空列表
+
+
+async def _scroll_window(page, dy: int) -> None:
+    \"\"\"窗口滚动：导航后若再用 evaluate(scrollBy)，易因执行上下文销毁报错；用 mouse.wheel 并在滚动前等待页面稳定。\"\"\"
+    try:
+        await page.wait_for_load_state("domcontentloaded", timeout=10_000)
+    except Exception:
+        pass
+    vp = page.viewport_size
+    if vp:
+        await page.mouse.move(vp["width"] // 2, vp["height"] // 2)
+    else:
+        await page.mouse.move(720, 450)
+    await page.mouse.wheel(0, float(dy))
 
 
 async def run():

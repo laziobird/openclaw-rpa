@@ -198,6 +198,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 
 #### 第二步：根据 snapshot 确定目标元素的 CSS 选择器
 - **必须使用 snapshot 中返回的真实 `sel` 字段**，禁止凭空猜测。
+- **默认用「渐进式探测」**（见下节）：不要指望单次 snapshot 覆盖全页；目标未出现就 **scroll → wait → snapshot** 循环，必要时 **`dom_inspect`**。
 - 若 snapshot 未返回有效选择器，说明目标元素可能在页面下方未渲染，先 `scroll` 再重新 snapshot。
 
 #### 第三步：执行操作（以下任选）
@@ -212,6 +213,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 | `click` | CSS 选择器 | — | 点击并等待页面稳定 |
 | `scroll` | — | 像素数 | 向下滚动 N 像素 |
 | `scroll_to` | CSS 选择器 | — | **滚动到指定元素，触发懒加载**，再 wait + snapshot |
+| `dom_inspect` | 容器 CSS 选择器 | — | **调试**：列出容器内子元素结构（**不记入脚本**），用于反推列表/标题的真实选择器 |
 | `extract_text` | CSS 选择器 | 输出文件名 | 提取多元素文本 → 写到 ~/Desktop/文件名 |
 | `wait` | — | 毫秒数 | 等待 |
 
@@ -229,28 +231,28 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 
 ---
 
-### ⚠️ 懒加载内容必须先滚动（适用于所有 SPA）
+### 渐进式探测（默认策略；替代「单次 snapshot 定终身」）
 
-React / Vue / Next.js 等现代 SPA **不会一次性渲染整页内容**，页面下方的区块（新闻列表、统计面板、评论区等）只有滚动到附近才会触发渲染。
+**适用：** 所有 SPA、长页面、顶栏/导航占满 snapshot 前几条、以及「列表在首屏以下」的场景。**核心：** 多轮 **滚动 → 等待 → snapshot（必要时 dom_inspect）**，再 **带容器前缀** 做 `extract_text`；**不要**用裸 `h3` / `a` 等全局标签当标题列表。
 
-**通用流程：提取页面某个区块的内容**
+**为何不能指望一次 snapshot「看见全页」：** 录制器返回的 📋 列表是**采样**（可见交互元素约 100 条、区块约 20 个），用于控 token；**不代表**页面只有这些节点。下方未渲染或未被采样的区域，要靠 **scroll + 再 snapshot** 或 **dom_inspect** 补。
+
+**标准流程（提取某区块 / 列表 / 标题前必走）：**
+
+1. **`goto`** 目标 URL（含 SPA settle，已内置）。
+2. **`wait`** 可选：500–2000ms，视站点而定。
+3. **`scroll`** `value=800~1200`（或 1000~2000），**重复 1～2 次**，触发 below-the-fold 与懒加载。
+4. 每次滚动后 **`wait`** `value=600~2000`。
+5. **`snapshot`** → 在 📋 / 🗂️ 中查找是否出现**目标区域**（列表项、区块标题、含 `data-testid` 的容器等）。
+6. **若没有** → 继续 **`scroll`**（例如再 800px）并回到步骤 4～5；**若已有可疑父容器但子结构不清** → 对该容器做一次 **`dom_inspect`**，从子元素反推 `target`（如 `a`、`h3`、带 testid 的节点）。
+7. **`extract_text`**：`target` **必须带容器前缀**，例如 `"[data-testid=\"…\"] h3 a"`、`main h3`、`#nimbus-app …`（以 snapshot/dom_inspect 为准）；**禁止**单独使用全局 `"h3"` 抽「新闻标题」类需求。配合 **`limit`** 取前 N 条。
+
+**简写版（与上表一致）：**
 ```
-1. goto  目标页面 URL
-
-2. snapshot  ← 了解初始 DOM 结构
-
-3. scroll  value=1000~2000      ← 向下滚动，触发目标区块的懒加载
-   （如果不知道区块在哪，可多次 scroll 直到 snapshot 里出现目标元素）
-
-4. wait  value=1000~2000        ← 等待懒加载内容渲染
-
-5. snapshot                     ← 重新扫描；查看 🗂️ 区块列表，找含目标标题的容器
-
-6. extract_text  target="{从 snapshot 区块中获取的选择器} h3"
-                 value="output.txt"  limit=5
+goto → (scroll + wait) × 1～2 → snapshot → 目标未出现则再 scroll 或 dom_inspect → extract_text（带容器前缀 + limit）
 ```
 
-> 每个 SPA 的懒加载时机不同，如果 snapshot 仍未出现目标元素，继续 scroll 800px 后再试。
+> 每个 SPA 懒加载时机不同；若 snapshot 仍无目标，继续 **scroll ~800px** 后再 **snapshot** 重试。
 
 ### 🔍 读取 snapshot 结果的方法
 
@@ -273,12 +275,37 @@ CSS选择器  [placeholder=...]  「文本预览」
   ```
 - 如果区块没有 data-testid，可用 `section:has(h2:text("区块标题")) li` 这类 Playwright 文本过滤语法
 
+### 选择器强度规则（extract_text 的 target 必须遵守）
+
+**裸标签（`h3`、`a`、`li`…）在任何页面上都不唯一**——它们在导航栏、侧栏、页脚、弹窗里都会出现。选择器必须**组合多个线索**才能钉住真正的目标。
+
+**强度从高到低排列。构造 `target` 时，至少选用一种高于「裸标签」的策略：**
+
+| 优先级 | 策略 | 通用写法 | 何时用 |
+|:------:|------|----------|--------|
+| 1 | **`main` / `[role="main"]` + 子标签** | `main h3`、`main article h3`、`[role="main"] li a` | 几乎所有现代站都有 `<main>`；最简单也最通用的圈定方式 |
+| 2 | **snapshot 区块 id / data-testid + 子标签** | `#content h3`、`[data-testid="…"] li` | snapshot 🗂️ 里出现了明确容器时直接用 |
+| 3 | **属性过滤** | `a[href*="/news/"]`、`li[class*="item"]` | 链接路径含关键词、或列表项有可识别 class 片段 |
+| 4 | **语义标签嵌套** | `article h2`、`section ul > li`、`[role="list"] a` | 无 id / testid 时，靠 HTML5 语义标签限定 |
+| 5 | **文本锚点（Playwright `:has`）** | `section:has(h2:text("…")) li` | snapshot 中有可见分区标题，但容器无 id 时 |
+| 6 | **排除噪声区** | `h3:not(nav h3):not(header h3)` | 上述策略都不好用时的降级手段 |
+| **禁止** | **裸标签** | ~~`h3`~~、~~`a`~~、~~`li`~~ | **永远不要**单独使用；即使引擎对裸标签有 `main` 防呆，仍可能落到导航区 |
+
+**构造流程（通用）：**
+1. 做 **snapshot**，在 🗂️ 区块列表中找**包含目标内容**的容器（看 heading / sel）。
+2. 若容器有 `id` / `data-testid` → 直接用 **策略 2**。
+3. 若容器无特征 → 看页面是否有 `<main>` → 用 **策略 1**。
+4. 仍不确定 → 对候选容器执行 **`dom_inspect`**，从子节点的 tag / class / href 特征中取 **策略 3–5**。
+5. 组合后再 `extract_text`。
+
+**录制器防呆：** 若 `target` 仍为裸标签（仅字母、无 `#` `.` `[` 空格），引擎在存在 `<main>` / `[role="main"]` 时会自动限定搜索范围——但这是**最后兜底**，不能替代上述组合选择器。
+
 ### 💡 常见场景提示
 
 | 场景 | 推荐做法 |
 |------|---------|
 | 页面内容区块（新闻/列表/评论等） | scroll 下去 → wait → snapshot → 从 🗂️ 区块找选择器 |
-| snapshot 找不到目标元素 | 元素未渲染，继续 scroll 800px 后重试 |
+| snapshot 找不到目标元素 | 未渲染或未被采样：继续 scroll 800px → 再 snapshot；或对可疑父容器 **dom_inspect** |
 | 提取重复结构内容（列表/卡片） | 用 `extract_text` + `limit` 只取前 N 条 |
 | 需要点击展开更多内容 | click "更多" 按钮 → wait → snapshot → extract_text |
 

@@ -42,7 +42,7 @@ metadata:
 #rpa-run:your-task-name
 ```
 
-Full protocol, state machine, and `record-step` JSON live in the locale file below.
+Full protocol, state machine, `record-step` JSON, **progressive probing**, and **selector strength** (composite CSS — container + tag / attributes / `:has()`; avoid bare `h3`) live in the locale file below.
 
 ## Mandatory: load the correct instruction file
 

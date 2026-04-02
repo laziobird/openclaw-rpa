@@ -28,6 +28,26 @@ https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
 
 录制协议（`record-start`、`record-step`、`plan-set`、`#结束录制` 等）见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md)。**先看有哪些已录好的 RPA 可用**：发 **`#rpa-list`**；**再跑其中一个**：`#rpa-run:{任务名}`（新对话）或 `#运行:{任务名}` / `python3 rpa_manager.py run <任务名>`（当前会话）。
 
+<a id="douban-movie-demo"></a>
+
+### 豆瓣电影（《霸王别姬》）— 浏览器录屏
+
+**豆瓣电影**（[movie.douban.com](https://movie.douban.com)）：**进入电影首页 → 搜索目标影片 → 打开第一条搜索结果详情页 → 抽取片名、豆瓣评分与剧情简介，并写入桌面文本文件**。本案例演示如何用 RPA 把「检索 + 打开详情 + 抽取影评页关键字段」录成可重复执行的 Playwright 脚本（与顶部 Sauce 流程同为「触发 → 录制 → 合成脚本」）。
+
+**视频（GitHub 播放）：** *地址预留——将录屏上传至 GitHub（如 Issue 附件或 Release 资源）后，把下方占位链接替换为实际的 `https://github.com/user-attachments/assets/…` 播放地址。*
+
+https://github.com/user-attachments/assets/00000000-0000-0000-0000-000000000000
+
+**录屏中的对话步骤**
+
+1. 发送 **`#rpa`** / **`#RPA`** / **`#自动化机器人`**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
+2. 任务名示例：与 **`registry.json`** 中已有脚本对齐，如 **`豆瓣电影V6`**（`豆瓣电影v6.py`）、**`获取豆瓣电影数据`**（`获取豆瓣电影数据.py`）等。
+
+**任务提示词（豆瓣电影片段）**
+
+1. 访问 `https://movie.douban.com`。
+2. 搜索电影 **「霸王别姬」** → 点击**搜索结果的第一条**，进入详情页 → 抽取 **片名**、**评分**、**剧情简介**。
+3. 将抽取内容保存到桌面的 **`movie.txt`**。
 
 ### OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 与定时执行
 
@@ -140,7 +160,7 @@ python3 rpa_manager.py run wikipedia
 | 脚本                         | 说明                                    |
 | -------------------------- | ------------------------------------- |
 | `wikipedia.py` / `wiki.py` | 维基百科（英文）                              |
-| `豆瓣电影.py`                  | 中文界面示例（遵守站点规则）                        |
+| `获取豆瓣电影数据.py`、`获取豆瓣电影数据.py` 等 | 中文界面示例（遵守站点规则）；浏览器录屏案例见 [豆瓣电影（《霸王别姬》）](#douban-movie-demo) |
 | `电商网站购物v10.py` 等           | Sauce Demo 电商流程（与顶部 [演示视频](#演示视频) 同类） |
 
 

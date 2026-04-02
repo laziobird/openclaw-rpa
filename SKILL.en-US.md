@@ -209,6 +209,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 
 #### Step 2: Choose the target CSS from the snapshot
 - **Must** use the real `sel` from the snapshot — **do not guess**.
+- **Default to progressive probing** (below): do not expect one `snapshot` to cover the whole page; if the target is missing, loop **scroll → wait → snapshot**, and use **`dom_inspect`** when needed.
 - If there is no valid selector, the element may be below the fold — `scroll` first, then `snapshot` again.
 
 #### Step 3: Perform an action (pick one)
@@ -223,6 +224,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 | `click` | CSS | — | Click, then wait for stability |
 | `scroll` | — | pixels | Scroll down by N pixels |
 | `scroll_to` | CSS | — | **Scroll element into view (lazy-load)**, then `wait` + `snapshot` |
+| `dom_inspect` | Container CSS | — | **Debug:** list child structure under a container (**not logged** to script); use to infer list/title selectors |
 | `extract_text` | CSS | output filename | Text from multiple elements → `~/Desktop/<filename>` |
 | `wait` | — | milliseconds | Wait |
 
@@ -240,28 +242,28 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 
 ---
 
-### Lazy-loaded content must be scrolled first (all SPAs)
+### Progressive probing (default; replaces “one snapshot is enough”)
 
-React / Vue / Next.js SPAs **do not** render the full page at once. Blocks below the fold (news lists, stats, comments, …) render only when scrolled near.
+**Use for:** SPAs, long pages, sites where the nav fills the first snapshot lines, and lists below the fold. **Core idea:** multiple rounds of **scroll → wait → snapshot (and `dom_inspect` if needed)**, then **`extract_text` with a scoped selector** — **never** use bare global `h3` / `a` for “headline list” style tasks.
 
-**Generic flow: extract content from a page region**
+**Why one snapshot is not “the whole page”:** the 📋 list is a **sample** (about 100 visible interactive nodes, ~20 section blocks) to cap tokens; **unrendered or unsampled regions** need **scroll + snapshot again** or **`dom_inspect`**.
+
+**Standard flow (before extracting a block / list / titles):**
+
+1. **`goto`** URL (SPA settle is built in).
+2. Optional **`wait`** 500–2000 ms depending on the site.
+3. **`scroll`** `value=800~1200` (or 1000–2000), **repeat 1–2 times** for below-the-fold and lazy load.
+4. **`wait`** `value=600~2000` after scrolls.
+5. **`snapshot`** — check 📋 / 🗂️ for the **target region** (list rows, block headings, containers with `data-testid`, etc.).
+6. **If missing** — **`scroll`** again (~800px) and repeat 4–5; **if a parent looks right but children are unclear** — run **`dom_inspect`** on that container and derive `target` from children (`a`, `h3`, testids).
+7. **`extract_text`:** `target` **must include a container prefix**, e.g. `"[data-testid=\"…\"] h3 a"`, `main h3`, `#nimbus-app …` (from snapshot / `dom_inspect`) — **do not** use a global `"h3"` alone for news-style headlines. Use **`limit`** for first N.
+
+**Short recipe:**
 ```
-1. goto   target URL
-
-2. snapshot   ← understand initial DOM
-
-3. scroll   value=1000~2000   ← scroll to trigger lazy-load for the target region
-   (repeat scroll until the target appears in snapshot if needed)
-
-4. wait     value=1000~2000   ← wait for lazy content
-
-5. snapshot                   ← rescan; use the 🗂️ block list to find the container title
-
-6. extract_text   target="{selector from snapshot block} h3"
-                  value="output.txt"  limit=5
+goto → (scroll + wait) × 1–2 → snapshot → if no target, more scroll or dom_inspect → extract_text (scoped + limit)
 ```
 
-> Lazy-load timing varies per SPA; if the target still does not appear, scroll ~800px and try again.
+> Lazy-load timing varies; if the target still does not appear, scroll ~800px, **`snapshot` again**, retry.
 
 ### Reading the `snapshot` output
 
@@ -284,12 +286,37 @@ CSS selector  [placeholder=...]  「text preview」
   ```
 - Without `data-testid`, you can use Playwright text filters, e.g. `section:has(h2:text("Section title")) li`.
 
+### Selector strength rules (extract_text target must follow)
+
+**Bare tags (`h3`, `a`, `li`, …) are never unique** — they appear in navs, sidebars, footers, and modals. A selector must **combine multiple signals** to pin the real target.
+
+**Ranked by strength. When building `target`, use at least one strategy above “bare tag”:**
+
+| Priority | Strategy | Generic pattern | When to use |
+|:--------:|----------|----------------|-------------|
+| 1 | **`main` / `[role="main"]` + child** | `main h3`, `main article h3`, `[role="main"] li a` | Almost every modern site has `<main>`; simplest universal scope |
+| 2 | **Snapshot block id / data-testid + child** | `#content h3`, `[data-testid="…"] li` | When snapshot 🗂️ shows a clear container |
+| 3 | **Attribute filter** | `a[href*="/news/"]`, `li[class*="item"]` | Link paths with keywords, or list items with recognizable class fragments |
+| 4 | **Semantic tag nesting** | `article h2`, `section ul > li`, `[role="list"] a` | No id / testid — rely on HTML5 semantic tags |
+| 5 | **Text anchor (Playwright `:has`)** | `section:has(h2:text("…")) li` | Snapshot has a visible section heading but the container has no id |
+| 6 | **Exclude noise** | `h3:not(nav h3):not(header h3)` | Fallback when none of the above work |
+| **Banned** | **Bare tag** | ~~`h3`~~, ~~`a`~~, ~~`li`~~ | **Never** use alone; even the engine’s `main` fallback may still hit nav areas |
+
+**Workflow (universal):**
+1. Run **snapshot**; find the container holding target content in the 🗂️ block list (check heading / sel).
+2. Container has `id` / `data-testid` → use **strategy 2**.
+3. Container has no identifiers → check for `<main>` → use **strategy 1**.
+4. Still unclear → run **`dom_inspect`** on the candidate container; derive **strategy 3–5** from children’s tag / class / href.
+5. Compose, then `extract_text`.
+
+**Recorder fallback:** If `target` is still a bare tag (letters only, no `#` `.` `[`, or space), the engine scopes to `<main>` / `[role="main"]` when present — but this is a **last resort**, not a substitute for the composite selectors above.
+
 ### Common scenarios
 
 | Scenario | Suggested approach |
 |----------|-------------------|
 | Content blocks (news/list/comments) | scroll → wait → snapshot → pick selector from 🗂️ |
-| Target not in snapshot | Not rendered yet — scroll ~800px and retry |
+| Target not in snapshot | Not rendered or not sampled — scroll ~800px → snapshot again; or **`dom_inspect`** a likely parent |
 | Repeating list/card rows | `extract_text` + `limit` for first N |
 | “Load more” / expand | click → wait → snapshot → `extract_text` |
 

@@ -52,6 +52,20 @@ async def _wait_for_content(page, selector: str) -> None:
         pass
 
 
+async def _scroll_window(page, dy: int) -> None:
+    """窗口滚动：导航后若再用 evaluate(scrollBy)，易因执行上下文销毁报错；用 mouse.wheel 并在滚动前等待页面稳定。"""
+    try:
+        await page.wait_for_load_state("domcontentloaded", timeout=10_000)
+    except Exception:
+        pass
+    vp = page.viewport_size
+    if vp:
+        await page.mouse.move(vp["width"] // 2, vp["height"] // 2)
+    else:
+        await page.mouse.move(720, 450)
+    await page.mouse.wheel(0, float(dy))
+
+
 async def run():
     async with async_playwright() as p:
         browser = await p.chromium.launch(
@@ -175,8 +189,10 @@ await page.wait_for_timeout({MS})
 
 ### `scroll`（窗口滚动）
 
+使用 `_scroll_window`（`mouse.wheel` + 滚动前 `wait_for_load_state`），避免导航后 `evaluate(scrollBy)` 触发「Execution context was destroyed」。
+
 ```python
-await page.evaluate("window.scrollBy(0, {PX})")
+await _scroll_window(page, {PX})
 await page.wait_for_timeout(600)
 ```
 
