@@ -2,9 +2,9 @@
 
 **[English](README.md)** | 中文
 
-## 演示视频
+## 案例视频
 
-### Sauce 电商购物网站 浏览器录屏
+### 1、Sauce 电商购物网站 浏览器录屏
 
 **Sauce **（[saucedemo.com](https://www.saucedemo.com)）录屏：**登录 → 按价格排序 → 加购最贵两件 → 登出**。展示从触发到录制、生成脚本的一条完整流程。
 =======
@@ -30,7 +30,7 @@ https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
 
 <a id="douban-movie-demo"></a>
 
-### 豆瓣电影（《霸王别姬》）— 浏览器录屏
+### 2、豆瓣电影（《霸王别姬》）— 浏览器录屏
 
 **豆瓣电影**（[movie.douban.com](https://movie.douban.com)）：**进入电影首页 → 搜索目标影片 → 打开第一条搜索结果详情页 → 抽取片名、豆瓣评分与剧情简介，并写入桌面文本文件**。本案例演示如何用 RPA 把「检索 + 打开详情 + 抽取影评页关键字段」录成可重复执行的 Playwright 脚本（与顶部 Sauce 流程同为「触发 → 录制 → 合成脚本」）。
 
@@ -49,7 +49,7 @@ https://github.com/user-attachments/assets/00000000-0000-0000-0000-000000000000
 2. 搜索电影 **「霸王别姬」** → 点击**搜索结果的第一条**，进入详情页 → 抽取 **片名**、**评分**、**剧情简介**。
 3. 将抽取内容保存到桌面的 **`movie.txt`**。
 
-### OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 与定时执行
+### 3、OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 定时执行 RPA 自动化程序
 
 录屏演示在飞书/Lark 与 **OpenClaw-bot** 对话中的典型用法：
 
