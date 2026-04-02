@@ -155,8 +155,8 @@ Recorder: `record-start` → `record-step` → `record-end` (see `rpa_manager.py
 | Script | Notes |
 |--------|--------|
 | `wikipedia.py` / `wiki.py` | Wikipedia (English) |
-| `豆瓣电影.py` | Chinese UI demo (follow site rules) |
-| `电商网站购物v10.py` (and related) | Sauce Demo flow (same as the [demo video](#demo-video) at the top) |
+| `获取豆瓣电影数据.py` | Chinese UI demo (follow site rules) |
+| `onlineshoppingv1.py` (and related) | Sauce Demo flow (same as the [demo video](#demo-video) at the top) |
 | `yahoonew.py` (`YahooNew` in **`registry.json`**) | Yahoo Finance quote → **News** tab → top 5 headlines to Desktop (see [Yahoo Finance demo](#yahoo-finance-nvda-demo)) |
 
 More notes: **`examples/README.md`**.

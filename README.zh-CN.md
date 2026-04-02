@@ -34,9 +34,7 @@ https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
 
 **豆瓣电影**（[movie.douban.com](https://movie.douban.com)）：**进入电影首页 → 搜索目标影片 → 打开第一条搜索结果详情页 → 抽取片名、豆瓣评分与剧情简介，并写入桌面文本文件**。本案例演示如何用 RPA 把「检索 + 打开详情 + 抽取影评页关键字段」录成可重复执行的 Playwright 脚本（与顶部 Sauce 流程同为「触发 → 录制 → 合成脚本」）。
 
-**视频（GitHub 播放）：** *地址预留——将录屏上传至 GitHub（如 Issue 附件或 Release 资源）后，把下方占位链接替换为实际的 `https://github.com/user-attachments/assets/…` 播放地址。*
-
-https://github.com/user-attachments/assets/00000000-0000-0000-0000-000000000000
+https://github.com/user-attachments/assets/594c8970-2f11-4e2b-ae57-e563cafe6bbd
 
 **录屏中的对话步骤**
 
