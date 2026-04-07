@@ -142,6 +142,8 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa/autologinv3.py
 
 The script injects the cookie, opens the product list immediately, and completes the sort.
 
+https://github.com/user-attachments/assets/233659db-f5c4-44c1-9245-0bcf53b9dfa1
+
 ---
 
 ## What to Do When Cookies Expire
