@@ -4,7 +4,7 @@ English | **[中文](README.zh-CN.md)**
 
 > **AI-driven RPA that records once and replays forever — no model needed at run time.**
 
-**openclaw-rpa** is an **LLM-based RPA Agent framework** built on [Playwright](https://playwright.dev/python/). You describe a task in plain language; the AI drives a **real, headed browser** step by step, records every action with a screenshot proof, then compiles everything into a **standalone Playwright Python script** that runs independently — no LLM, no cloud dependency, no fragile selectors hardcoded by hand.
+**openclaw-rpa** is an **LLM-based RPA Agent framework**. You describe a task in plain language; the AI executes it step by step in a **real browser, on your computer, or via API services** — with screenshot proof at every step — then compiles everything into a **standalone Python script**. Replay requires no LLM, no cloud dependency; just let OpenClaw select and run the automation task automatically.
 
 ## What you can automate
 
