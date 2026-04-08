@@ -4,7 +4,7 @@
 # Output: ../openclaw-rpa-clawhub-upload/ (sibling of repo root by default)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="~/Desktop/openclaw-rpa-clawhub-upload}"
+OUT=~/Desktop/openclaw-rpa-clawhub-upload
 
 echo "==> Source: $ROOT"
 echo "==> Output: $OUT"
@@ -30,17 +30,16 @@ rsync -a --delete \
   --exclude '*.gif' \
   --exclude '*.mp4' \
   --exclude '*.jsonl' \
-  --exclude 'rpa/' \  # exclude rpa folder
-  --exclude 'images/' \  # exclude images folder  
-  --exclude 'articles/wechat-openclaw-rpa-intro.md' \  # exclude articles folder    
-  --exclude 'scripts/gen_fixture_invoice_import.py' \  # exclude scripts folder    
-  --exclude 'scripts/export-clawhub-bundle.sh' \  # exclude scripts folder   
-  --exclude 'articles/openapi-ap-reconciliation-mock.yaml' \  # exclude articles folder      
+  --exclude 'rpa/' \
+  --exclude 'images/' \
+  --exclude 'articles/wechat-openclaw-rpa-intro.md' \
+  --exclude 'scripts/gen_fixture_invoice_import.py' \
+  --exclude 'scripts/export-clawhub-bundle.sh' \
+  --exclude 'articles/openapi-ap-reconciliation-mock.yaml' \
   "$ROOT/" "$OUT/"
 
 # ClawHub rejects dotfiles named .gitignore; keep them in git, omit from upload bundle.
 find "$OUT" -name '.gitignore' -delete
-rmdir "$OUT/proofs" 2>/dev/null || true
 
 # Ensure SKILL.md exists at bundle root
 if [[ ! -f "$OUT/SKILL.md" ]]; then
