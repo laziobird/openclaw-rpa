@@ -1,21 +1,47 @@
-# openclaw-rpa
+# 🚀 OpenClaw-RPA 
 
 **[English](README.md)** | 中文
 
-> **AI 录制一次，脚本永久复用 —— 回放时无需模型。**
+### **AI Agent 的“RPA 编译器”**
+**一次记录 → 永久重放为确定性 Python 脚本。彻底终结重复任务中的“大模型税”。**
 
-**openclaw-rpa** 是基于 LLM 的 RPA Agent 框架。你用自然语言描述任务，AI 在**真实的浏览器、Computer、API服务**里一步步执行、截图留证，最终将所有操作编译成**可独立运行的Python 脚本**——回放时不需要大模型、不依赖云服务、在Openclaw 自动选择自动化任务即可。
+[![许可证: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Playwright](https://img.shields.io/badge/powered%20by-Playwright-green)](https://playwright.dev/)
 
-## 可以自动化哪些任务
+---
 
-| 类别 | 典型场景 |
-|------|---------|
-| **浏览器操作** | 登录、导航、点击、填表、文本提取、排序/筛选 |
-| **HTTP API** | 调用任意 REST 接口（GET / POST），保存 JSON，API 密钥直接写入脚本 |
-| **Excel（`.xlsx`）** | 新建/更新工作簿、多 Sheet、表头、冻结首行、从 JSON 或其他文件动态写入行 |
-| **Word（`.docx`）** | 生成含表格的报告——无需安装 Microsoft Office |
-| **自动登录** | `#rpa-login` 保存一次 Cookie，后续录制和回放自动注入，跳过短信/滑块/扫码登录 |
-| **混合流程** | 以上任意组合在同一个录制任务中 |
+## 💡 为什么选择 OpenClaw-RPA？
+
+目前的 AI 网页 Agent 虽然强大，但在生产环境中存在**本质缺陷**：
+* **“大模型税” (LLM Tax)：** 为什么要为了 Agent 点击一个它已经点过 100 次的“下载”按钮而重复支付 Token 费用？
+* **高延迟：** 等待大模型对固定的 UI 界面进行“推理”极其缓慢。
+* **不可控性：** 高采样温度（Temperature）的模型可能会产生幻觉，从而破坏稳定的工作流。
+
+**OpenClaw-RPA 弥补了这一鸿沟。** 利用大模型的智能来**发现并记录**一次工作流，然后将其编译为**独立的、高速运行的 Playwright 脚本**。此后运行，**Token 消耗永远为零**。
+
+---
+
+## ✨ 核心特性
+
+* **⚡ 零 Token 重放：** 将 Agent 的推理过程编译为纯 Python 代码。在日常重复任务中节省 100% 的推理成本。
+* **🔑 会话保持与免登录 (#rpa-login)：** 手动解决一次 2FA、二维码或短信验证。工具会自动将 Cookie 注入到未来的所有无头（Headless）运行中。**永久绕过登录墙。**
+* **🌐 HTTP API 记录：** 在同一个可重放脚本中，将 REST `GET/POST` 请求与浏览器操作完美融合。
+* **📄 原生 Office 自动化：** 内置 `excel_write` 和 `word_write`。**无需安装 Microsoft Office。** 非常适合 Linux/Docker 环境。
+* **🔗 无缝集成：** 作为 OpenClaw 生态系统中的强大技能设计，同时生成标准的 Python/Playwright 代码。
+
+---
+
+## 🎥 有图有真相 (Show, Don't Tell)
+
+| **记录模式 (大模型思考中)** | **重放模式 (确定性脚本)** |
+| :--- | :--- |
+| *Agent 分析 DOM 并规划动作...* | *以原生代码速度执行...* |
+| 💸 **成本：** $$$ (消耗 Token) | 💰 **成本：** $0.00 (纯 Python) |
+| 🐢 **速度：** 缓慢 (需要推理) | 🚀 **速度：** 瞬间 (直接执行) |
+
+![shopping-hd](https://github.com/user-attachments/assets/482f6783-2563-4d3d-8af6-21db92d2d89c)
+
 
 ## 工作原理
 
