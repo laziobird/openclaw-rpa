@@ -40,6 +40,18 @@ Current AI Web Agents are amazing but **fundamentally flawed** for production:
 | 💸 **Cost:** $$$ (Tokens) | 💰 **Cost:** $0.00 (Pure Python) |
 | 🐢 **Speed:** Slow (Reasoning) | 🚀 **Speed:** Instant (Execution) |
 
+### **Competitive Analysis: The RPA Evolution**
+
+| Feature | Legacy RPA (UIPath, etc.) | Pure LLM Agents (Browser-use) | **OpenClaw-RPA (The Compiler)** |
+| :--- | :--- | :--- | :--- |
+| **Development Cost** | High (Manual selectors/logic) | Low (Natural language) | **Low (Auto-record & Compile)** |
+| **Operational Cost** | High (Expensive licenses) | Very High (Token cost per run) | **Near Zero (Native Python scripts)** |
+| **Execution Speed** | Moderate | Slow (Inference latency) | **Instant (Native code execution)** |
+| **Stability** | Brittle (Breaks on UI changes) | Probabilistic (Prone to hallucinations) | **Deterministic (High reliability code)** |
+| **2FA Handling** | Extremely Complex | Costly (Requires live reasoning) | **Simple (One-time session capture)** |
+| **Environment** | Windows & MS Office | Flexible (But expensive) | **Cloud-Native (Linux/Docker ready)** |
+| **Architecture** | Manual Flowcharts | Real-time Reasoning | **Reason Once → Compile → Replay** |
+
 ![shopping-hd-960p](https://github.com/user-attachments/assets/4c30d799-803e-458b-a496-ee5f38513da8)
 
 
