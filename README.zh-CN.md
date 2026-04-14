@@ -189,12 +189,13 @@ API Parameters
 把 nvda_time_series_daily.json 和 nvda_news.txt 合并成 nvda.txt
 ```
 
-### 4、Airbnb 民宿竞品比价追踪机器人（网页 + Word）
+### 4、Airbnb 民宿竞品比价追踪机器人（网页 + 视觉识别 + Word）
 
 **场景：** 零代码打造一个能自动打开浏览器、提取 Airbnb 竞品价格与评分，并最终生成 Word 报告的 RPA 机器人。
 
 - **完整案例：** **[articles/scenario-airbnb-compare.md](articles/scenario-airbnb-compare.md)**
 - **说明：** 录制一次，自动生成 Python 脚本。以后每次运行直接跑底层代码，速度极快，且零 Token 消耗，不会产生 AI 幻觉。
+- **视觉模式处理 SPA：** Airbnb 是高度动态的单页应用（SPA），传统爬虫几乎无法处理。本案例引入**视觉识别**模式，AI 像人一样"看"页面来提取数据，无需依赖不稳定的 DOM 结构。视觉模型采用 [Qwen3-VL](https://github.com/QwenLM/Qwen3-VL)（阿里开源），Token 消耗极小，支持本地部署。
 
 ### 4、OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 定时执行 RPA 自动化程序
 
@@ -295,48 +296,8 @@ python3 rpa_manager.py env-check
 
 ## 高级配置
 
-**手动安装 · 网关 Python · 路径 · 发布**
-
-### 手动安装（不用 `install.sh`）
-
-```bash
-cd /path/to/openclaw-rpa
-python3 -m venv .venv && source .venv/bin/activate
-pip install -U pip && pip install -r requirements.txt
-python -m playwright install chromium
-```
-
-### 网关实际调用的 Python
-
-`rpa_manager.py` 使用 `**sys.executable**`，该解释器必须已装 **Playwright**。若网关用系统 `**python3`**，请在同一环境装依赖，或把工具指向：
-
-`~/.openclaw/workspace/skills/openclaw-rpa/.venv/bin/python`
-
-### 语言与 `config.json`
-
-- `**SKILL.md**` 中 `**localeConfig**` 指向 `**config.json**`
-- 若无 `**config.json**`，可按 `**SKILL.md**` 用 `**config.example.json**` 读 `locale`
-- 详见 `**LOCALE.md**`
-
-### `SKILL.*.md` 里的路径
-
-示例中的 `~/.openclaw/workspace/skills/openclaw-rpa/` 若与你的本机不一致，请改成实际技能目录。
-
-### 对外发布技能
-
-**[ClawHub — 发布 skill](https://clawhub.ai/publish-skill)**（绑定本 GitHub 仓库）。
-
-### 环境自检
-
-```bash
-python3 envcheck.py
-# 或
-python3 rpa_manager.py env-check
-```
-
-`record-start` / `run` 在可能时会自动安装 Chromium。
-
-
+手动安装、网关 Python、语言配置、路径、发布说明：
+**[articles/advanced-setup.zh-CN.md](articles/advanced-setup.zh-CN.md)**
 
 ---
 
@@ -370,47 +331,17 @@ python3 rpa_manager.py run wikipedia
 
 ## 调用 API 的录制（`api_call`）
 
-录制器支持 **`api_call`** 步骤：通过 **httpx** 发起 **GET/POST** 等请求，响应可选保存到桌面。字段说明见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md) 中「单步录制协议」表格的 **`api_call`** 行；组合流程见 **典型场景 1**。
+录制器支持 **`api_call`** 步骤（通过 httpx 发 GET/POST，响应可选保存到桌面）。
 
-### API 说明
-
-<a id="api_call_notes"></a>
-
-面向**协助录制的 AI / 开发者**（终端、JSON、`record-step` 等在此说明；**普通用户照着说的任务提示词**见上文 **[案例 §3](#api-quotes-news-brief-zh)**）。
-
-1. **`api_call` 做什么**  
-   在录制会话里增加一步：**向指定 URL 发 HTTP 请求**（与当前浏览器页面无关），可选把返回内容写到桌面文件（如 **`save_response_to`**）。
-
-2. **密钥写入策略**  
-   在 `record-step` JSON 的 `params` 或 `headers` 中，用占位符 **`__ENV:环境变量名__`**；同时在同一步骤带上 **`"env": {"变量名": "真实密钥"}`** 字段：
-
-   ```json
-   {
-     "action": "api_call",
-     ...,
-     "params": {"apikey": "__ENV:ALPHAVANTAGE_API_KEY__", ...},
-     "env": {"ALPHAVANTAGE_API_KEY": "你的真实密钥"}
-   }
-   ```
-
-   代码生成器检测到 `env` 字段后，会把真实密钥**直接写入生成脚本**（如 `'apikey': '你的密钥'`）——回放时**无需 `export`**，脚本可直接运行。  
-   若不提供 `env`，则生成 `os.environ.get("变量名", "")`，运行前需手动 `export 变量名=…`。
-
-3. **本 README [案例 §3](#api-quotes-news-brief-zh) 对应的接口（Alpha Vantage 日线）**  
-   文档：[TIME_SERIES_DAILY](https://www.alphavantage.co/documentation/#daily)。`record-step` 典型写法：**`base_url`** + **`params`**（含 `function`、`symbol`、`outputsize` 等），`apikey` 填 **`"__ENV:ALPHAVANTAGE_API_KEY__"`**，`env` 填真实密钥，**`save_response_to`** 填输出文件名。
-
-**占位符小结：** 用 **`__ENV:变量名__`** + **`"env"` 字段**同时使用 → 密钥写入脚本，无需额外 `export`。
-
-### 案例：行情 + 新闻页 + 本地简报
-
-**给非技术用户看的任务提示词**见 **[案例 §3](#api-quotes-news-brief-zh)**；**接口与密钥**见 **[API 说明](#api_call_notes)**。同一录制任务可 **(1)** 拉行情 JSON 落盘，**(2)** 浏览器打开新闻页，**(3)** **`extract_text`** 写入同一简报文件名（追加规则见 [**典型场景 1**](SKILL.zh-CN.md#典型场景-1行情--新闻页--本地简报浏览器--api--文件)）。
+完整指南 — 密钥写入策略、env 字段说明、示例：
+**[articles/api-call-guide.zh-CN.md](articles/api-call-guide.zh-CN.md)**
 
 ---
 
 **说明与边界**
 
 - **合规**：请遵守各网站服务条款与使用政策；本仓库不鼓励绕过风控或在禁止场景下抓取数据。
-- **强风控站点（如 LinkedIn）**：即便支持自动登录或会话复用，仍可能遇到 **2FA、设备验证、验证码、风控拦截**，需要 **人工介入**。目标是：在 **你的环境能维持稳定会话** 时，少录、少跑重复的登录流程；**不承诺**对所有平台都能长期无人值守。
+- **强风控站点（如 LinkedIn）**：即便支持自动登录或会话复用，仍可能遇到 **2FA、设备验证、验证码、风控拦截**，需要**人工介入**。
 
 ---
 

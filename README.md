@@ -195,12 +195,13 @@ Open Sina Finance https://finance.sina.com.cn/, search for NVDA, click "Company 
 Merge nvda_time_series_daily.json and nvda_news.txt into nvda.txt.
 ```
 
-### 4. Airbnb Competitor Price Tracker (Browser + Word)
+### 4. Airbnb Competitor Price Tracker (Browser + Vision + Word)
 
 **Scenario:** Zero-code creation of an RPA robot that automatically opens a browser, extracts Airbnb competitor prices and ratings, and generates a Word report.
 
 - **Full tutorial (CN):** **[articles/scenario-airbnb-compare.md](articles/scenario-airbnb-compare.md)**
 - **Notes:** Record once, auto-generate a Python script. Replay runs the underlying code directly—extremely fast, zero Token cost, and no AI hallucinations.
+- **Vision mode for SPAs:** Airbnb is a heavily dynamic Single-Page Application. Traditional crawlers struggle with it. This case uses **visual recognition** to extract data exactly as a human would read the screen — powered by [Qwen3-VL](https://github.com/QwenLM/Qwen3-VL) (Alibaba's open-source vision model), which has low token cost and supports local deployment.
 
 ### 4. OpenClaw + Feishu/Lark: `#rpa-list`, `#rpa-run`, and scheduled run
 
@@ -302,49 +303,8 @@ See comment block at the top of `requirements.txt` for the same breakdown.
 
 ## Advanced
 
-<details>
-<summary><b>Manual install · gateway Python · paths · publishing</b></summary>
-
-### Manual install (no `install.sh`)
-
-```bash
-cd /path/to/openclaw-rpa
-python3 -m venv .venv && source .venv/bin/activate
-pip install -U pip && pip install -r requirements.txt
-python -m playwright install chromium
-```
-
-### Which `python` does OpenClaw use?
-
-`rpa_manager.py` uses **`sys.executable`**. That interpreter must have **Playwright**. If the gateway uses **system** `python3`, install deps there **or** point tools at:
-
-`~/.openclaw/workspace/skills/openclaw-rpa/.venv/bin/python`
-
-### Locale & `config.json`
-
-- **`SKILL.md`** → `metadata.openclaw.localeConfig` → **`config.json`**
-- If `config.json` is missing, the router can use **`config.example.json`** for `locale`
-- Details: **`LOCALE.md`**
-
-### Paths in `SKILL.en-US.md` / `SKILL.zh-CN.md`
-
-Examples may use `~/.openclaw/workspace/skills/openclaw-rpa/`. Change the prefix if your workspace differs.
-
-### Publish the skill
-
-**[ClawHub — publish a skill](https://clawhub.ai/publish-skill)** (link this GitHub repo).
-
-### Environment check
-
-```bash
-python3 envcheck.py
-# or
-python3 rpa_manager.py env-check
-```
-
-`record-start` / `run` can auto-install Chromium if missing.
-
-</details>
+Manual install, gateway Python, locale config, paths, and publishing:
+**[articles/advanced-setup.md](articles/advanced-setup.md)**
 
 ---
 
@@ -378,46 +338,16 @@ Recorder: `record-start` → `record-step` → `record-end` (see `rpa_manager.py
 
 ## API recording (`api_call`)
 
-The recorder supports **`api_call`** steps: **GET/POST** (or other methods) via **httpx**, with the response optionally saved under the Desktop. Full field list and progressive-probing tips: **[SKILL.en-US.md — `api_call`](SKILL.en-US.md#single-step-recording-protocol-for-every-user-instruction)** and **Scenario 1**.
+The recorder supports **`api_call`** steps (GET/POST via httpx, response optionally saved to Desktop).
 
-### API notes
-
-<a id="api_call_notes"></a>
-
-For **agents / developers** (shell, JSON, `record-step`—not the plain-language user prompt in **[§3](#api-quotes-news-brief)**).
-
-1. **What `api_call` does**  
-   Adds a step that issues an **HTTP request** to a URL (independent of the current browser page) and optionally writes the response to a Desktop file (**`save_response_to`**).
-
-2. **Key embedding strategy**  
-   In the `record-step` JSON, use **`__ENV:ENV_VAR_NAME__`** in `params` or `headers` **and** include the actual key in the step's **`"env"` field**:
-
-   ```json
-   {
-     "action": "api_call",
-     ...,
-     "params": {"apikey": "__ENV:ALPHAVANTAGE_API_KEY__", ...},
-     "env": {"ALPHAVANTAGE_API_KEY": "your-real-key"}
-   }
-   ```
-
-   The code generator detects the `env` field and **writes the key directly into the script** (e.g. `'apikey': 'your-real-key'`) — no `export` needed for replay; the script runs as-is.  
-   If `env` is omitted, the generated code uses `os.environ.get("VAR", "")` and requires `export VAR=…` before running.
-
-3. **This README's [§3](#api-quotes-news-brief) example (Alpha Vantage daily)**  
-   Docs: [TIME_SERIES_DAILY](https://www.alphavantage.co/documentation/#daily). Typical `record-step`: **`base_url`** + **`params`** (`function`, `symbol` = IBM, `outputsize` = compact, …), `apikey` = `"__ENV:ALPHAVANTAGE_API_KEY__"`, `env` with real key, **`save_response_to`** = output filename.
-
-**Summary:** Use **`__ENV:NAME__`** + **`"env"` field** together → key written into script, no `export` needed.
-
-### Example: quotes + news page + local brief
-
-**Plain-language task prompt:** **[§3](#api-quotes-news-brief)**. **Wiring:** **[API notes](#api_call_notes)**. One task can **(1)** save quote JSON, **(2)** open a news page, **(3)** **`extract_text`** into the same brief filename (append rules in **[Scenario 1](SKILL.en-US.md#scenario-1-quotes--news-page--local-brief-browser--api--file)**).
+Full guide — key embedding strategy, env field, examples:
+**[articles/api-call-guide.md](articles/api-call-guide.md)**
 
 ---
 **Caveats**
 
-- **Compliance:** Follow each site’s terms of service and policies. This repo does not endorse evading safeguards or scraping where it isn’t allowed.
-- **High-friction sites (e.g. LinkedIn):** Even with auto sign-in or session reuse, you may still hit **2FA, device checks, CAPTCHAs, and risk blocks** that require **human steps**. The goal is fewer redundant login flows **when your environment can keep a stable session**—not a promise of **fully unattended** operation on every platform.
+- **Compliance:** Follow each site's terms of service and policies. This repo does not endorse evading safeguards or scraping where it isn't allowed.
+- **High-friction sites (e.g. LinkedIn):** Even with auto sign-in or session reuse, you may still hit **2FA, device checks, CAPTCHAs, and risk blocks** that require **human steps**.
 
 ---
 
