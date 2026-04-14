@@ -21,6 +21,8 @@ metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 
 1. **Saves compute and money** — Letting a **large model** operate the browser **every** time can cost **on the order of single-digit to tens of US dollars** per heavy session (tokens, tools, long context). After you **record once**, repeat runs **do not invoke the model**—cost is essentially **local script execution**, and runs are **much faster** than step-by-step LLM reasoning.
 2. **Verify the flow once, then run the same steps every time** — During recording you **prove** the task works; replay **executes the saved steps** deterministically. You avoid asking the AI to improvise on each run, which **reduces inconsistency** and **hallucination-driven** mistakes.
+3. **Vision recognition conquers SPAs** — For heavily dynamic Single-Page Applications like Airbnb or Ctrip, recording auto-triggers vision mode: the agent takes a screenshot and calls **[Qwen3-VL](https://github.com/QwenLM/Qwen3-VL)** (Alibaba open-source vision model) to read data directly from the screen — **no fragile DOM selectors**. Ultra-low token cost; supports local deployment. Featured case: [Airbnb Competitor Price Tracker](articles/scenario-airbnb-compare.md).
+4. **Structured task prompt + standard orchestration templates** — Use the `[var]` / `[step]` / `[constraint]` three-section prompt format; the Skill automatically decomposes multi-step goals into a sequential recording series and organizes each step with the built-in **Extract → Aggregate → Write** (three-layer) template, ensuring clear, replayable, deterministic results.
 
 **Recommended LLM:** Minimax 2.7 · Google Gemini Pro 3.0 and above · Claude Sonnet 4.6
 
@@ -65,6 +67,7 @@ In chat, prefer **`#rpa-list`** → **`#rpa-run:your-task-name`** so names match
 |---------|---------|
 | **Browser only** | **E‑commerce:** login → browse → cart/checkout (`rpa/电商网站购物*.py` style). **Yahoo Finance:** quotes / headlines. **Movies:** aggregate **reviews & ratings**. |
 | **Browser then files** | Same flow, plus **`extract_text`** when asked. |
+| **Browser + Vision (SPA) + Word** | **Airbnb competitor pricing:** SPA pages use **`extract_by_vision`** (Qwen3-VL) to pull listing name / price / rating, written to a **Word report**. See **[tutorial](articles/scenario-airbnb-compare.md)**. |
 | **Browser + HTTP API + files** | **Scenario 1:** **`api_call`** (e.g. [Alpha Vantage TIME_SERIES_DAILY](https://www.alphavantage.co/documentation/#daily)) saves JSON/text locally, then **`goto` + `extract_text`** for a brief. |
 | **HTTP API + Excel + Word (browser optional)** | **AP reconciliation:** mock **GET** batches, local sheets, **no submit**; output **.docx** with tables — see **[EN](articles/scenario-ap-reconciliation.en-US.md)** · **[中文](articles/scenario-ap-reconciliation.md)**. |
 | **Files only in script** | After **`record-end`**, add folder cleanup—**no URL** for that block. |

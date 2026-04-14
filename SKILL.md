@@ -83,8 +83,6 @@ Generated file is **ordinary Python** (`rpa/*.py`) — runs standalone with `pyt
 
 | Situation | Why | Workaround |
 |-----------|-----|------------|
-| Highly dynamic SPAs (heavy client-side routing) | Selectors shift between renders; snapshots may miss content | Use `dom_inspect` + `scroll` to locate stable selectors |
-| CAPTCHA / bot-detection (reCAPTCHA, hCaptcha) | Automation blocked; human verification required | — |
 | Login-gated flows (password / SMS OTP / slider / QR code) | Credentials and 2FA must be handled manually | **Use `#rpa-login` to log in once manually → cookies saved automatically → `#rpa-autologin` injects them on every future recording and replay, skipping the login flow entirely** |
 
 > **Tip:** on a new site, start with `goto` + `snapshot` to confirm the page structure is readable before building a full flow.

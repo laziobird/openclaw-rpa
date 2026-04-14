@@ -20,6 +20,8 @@ metadata: {"openclaw": {"emoji": "🤖", "os": ["darwin", "linux"]}}
 
 1. **大幅节约算力与费用** — 若每次重复操作都让**大模型**代点浏览器，单次会话往往 **数美金到数十美金** 量级（token、工具、长上下文等）。录成 RPA 后，**重复执行不再调大模型**，成本接近 **仅跑本地脚本**，且 **速度远快于** 每步都等模型推理。
 2. **第一次把流程跑通、确认无误，以后按同一套步骤执行** — 录制阶段你已 **验证** 任务能正确完成；回放时 **严格按已保存步骤执行**（可预期、可重复），不必每次再让 AI「临场发挥」。避免 **反复调用大模型** 带来的 **稳定性变差** 与 **幻觉、误操作** 风险。
+3. **视觉识别（Vision）攻克 SPA 难题** — 对 Airbnb、携程等高度动态单页应用（SPA），录制时自动触发视觉模式：AI 截图并调用 **[Qwen3-VL](https://github.com/QwenLM/Qwen3-VL)**（阿里开源视觉大模型）直接从屏幕上"读取"数据，**无需依赖随时会变的 DOM 选择器**。Token 消耗极小，支持本地部署。典型案例：[Airbnb 竞品比价追踪](articles/scenario-airbnb-compare.md)。
+4. **结构化任务描述 + 标准编排模版** — 发任务时用 `[变量]` / `[步骤]` / `[约束]` 三段式结构，Skill 自动把多步目标拆解成逐步录制序列，按内置 **「提取 → 汇总 → 写出」三层编排模版** 组织每步操作，确保录制清晰、可回放、结果可预期。
 
 **推荐大模型：** Minimax 2.7 · Google Gemini Pro 3.0 及以上 · Claude Sonnet 4.6
 
@@ -123,6 +125,7 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py run "任务名"
 |------|------|
 | **仅浏览器** | 如电商：**登录 → 选购 → 加购/结算**（参考仓库 `rpa/电商网站购物*.py`）；或 **Yahoo 财经** 行情/新闻；或电影站 **影评与评分** 汇总。 |
 | **浏览器 + 文件** | 同上，必要时 **`extract_text`** 落盘。 |
+| **浏览器 + 视觉识别（SPA）+ Word** | **Airbnb 竞品比价**：SPA 页面用 **`extract_by_vision`**（Qwen3-VL）提取民宿名称/价格/评分，结构化写入 **Word 报告**。见 **[案例教程](articles/scenario-airbnb-compare.md)**。 |
 | **浏览器 + HTTP API + 文件** | **典型场景 1**：**`api_call`**（如 [Alpha Vantage TIME_SERIES_DAILY](https://www.alphavantage.co/documentation/#daily)）写本地 JSON/文本，再配合 **`goto` + `extract_text`** 生成简报。 |
 | **HTTP API + Excel + Word（可无网页）** | **应付对账案例**：Mock **GET** 拉批次、本地多 Sheet 对账、**不提交 ERP**；结果 **Word 表格**；见 **[articles/scenario-ap-reconciliation.md](articles/scenario-ap-reconciliation.md)**。 |
 | **脚本内文件** | 录完后只加整理下载目录、改名等——可与网页无关。 |
@@ -145,8 +148,6 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py run "任务名"
 
 | 场景 | 原因 |
 |------|------|
-| **高度动态的 SPA**（重度客户端路由、DOM 频繁变动） | 选择器在每次渲染间可能发生偏移；snapshot 可能遗漏未渲染内容 |
-| **含验证码 / 反爬机制**（reCAPTCHA、hCaptcha、Cloudflare Turnstile） | 自动化会被拦截，须人工通过验证才能继续 |
 | **登录后才可访问且无保存会话的流程** | 需手动处理账号密码与二次验证，回放前须先登录 |
 | **无稳定 ID 的无限下拉流** | 渐进式探测有帮助，但结果可能不稳定 |
 
