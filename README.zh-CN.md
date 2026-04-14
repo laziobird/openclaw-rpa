@@ -60,7 +60,7 @@
 你（自然语言描述任务）
       │
       ▼
-  #自动化机器人 / #rpa-api     ← 触发
+  #rpa / #RPA / #rpa-api     ← 触发
       │
       ▼
  AI 驱动真实 Chrome           ← record-step（每步截图留证）
@@ -93,7 +93,7 @@ git clone https://github.com/laziobird/openclaw-rpa.git
 cd openclaw-rpa && ./scripts/install.sh
 
 # 在 OpenClaw 对话中，选择触发词：
-#自动化机器人           # 纯网页流程
+#rpa                   # 纯网页流程
 #rpa-api               # 含 HTTP API 的流程
 #rpa-login <url>       # 保存登录会话（Cookie）
 #rpa-list              # 列出所有已录制任务
@@ -118,7 +118,7 @@ https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
 
 **对话步骤**
 
-1. 发送 **`#rpa`** / **`#RPA`** / **`#自动化机器人`**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
+1. 发送 **`#rpa`** / **`#RPA`**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
 2. **一条消息两行**：第 1 行任务名（如 **`电商网站购物`**），第 2 行能力码（如 **`A`** 仅网页；含表格用 **`D`** 等），规则见 **SKILL.zh-CN.md**「ONBOARDING」。
 
 **任务提示词**
@@ -128,7 +128,7 @@ https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
 3. 将**最贵的两件**商品加入购物车。  
 4. **退出登录**。
 
-录制协议（`record-start`、`record-step`、`plan-set`、`#结束录制` 等）见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md)。**先看有哪些已录好的 RPA 可用**：发 **`#rpa-list`**；**再跑其中一个**：`#rpa-run:{任务名}`（新对话）或 `#运行:{任务名}` / `python3 rpa_manager.py run <任务名>`（当前会话）。
+录制协议（`record-start`、`record-step`、`plan-set`、`#end` 等）见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md)。**先看有哪些已录好的 RPA 可用**：发 **`#rpa-list`**；**再跑其中一个**：`#rpa-run:{任务名}` 或 `python3 rpa_manager.py run <任务名>`。
 
 <a id="douban-movie-demo"></a>
 
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/594c8970-2f11-4e2b-ae57-e563cafe6bbd
 
 **录屏中的对话步骤**
 
-1. 发送 **`#rpa`** / **`#RPA`** / **`#自动化机器人`**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
+1. 发送 **`#rpa`** / **`#RPA`**（规则见 [**SKILL.md**](SKILL.md)、[**SKILL.zh-CN.md**](SKILL.zh-CN.md)「触发检测」）。
 2. 任务名示例：与 **`registry.json`** 中已有脚本对齐，如 **`豆瓣电影V6`**（`豆瓣电影v6.py`）、**`获取豆瓣电影数据`**（`获取豆瓣电影数据.py`）等。
 
 **任务提示词（豆瓣电影片段）**
@@ -189,6 +189,13 @@ API Parameters
 把 nvda_time_series_daily.json 和 nvda_news.txt 合并成 nvda.txt
 ```
 
+### 4、Airbnb 民宿竞品比价追踪机器人（网页 + Word）
+
+**场景：** 零代码打造一个能自动打开浏览器、提取 Airbnb 竞品价格与评分，并最终生成 Word 报告的 RPA 机器人。
+
+- **完整案例：** **[articles/scenario-airbnb-compare.md](articles/scenario-airbnb-compare.md)**
+- **说明：** 录制一次，自动生成 Python 脚本。以后每次运行直接跑底层代码，速度极快，且零 Token 消耗，不会产生 AI 幻觉。
+
 ### 4、OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 定时执行 RPA 自动化程序
 
 录屏演示在飞书/Lark 与 **OpenClaw-bot** 对话中的典型用法：
@@ -230,7 +237,7 @@ https://github.com/user-attachments/assets/514e2d74-f42a-4243-8d49-52931fe6c22e
 **财务 / 应付：** 云端 Mock **仅 GET** 拉待对账数据；**不回写 ERP**；与桌面 **发票 Excel** 在本地对账；最终输出带**表格**的 **Word（`.docx`）**。
 
 - **完整案例：** **[articles/scenario-ap-reconciliation.md](articles/scenario-ap-reconciliation.md)**  
-- **录制：** `#rpa-api` 或 `#自动化机器人`；能力码常用 **F**（表+Word）；步骤 2/3a 用 `excel_write`（`rows_from_json` / `rows_from_excel` 动态行），步骤 3b 用 `python_snippet` 注入匹配计算代码（录制时立即验证）。  
+- **录制：** `#rpa-api` 或 `#rpa`；能力码常用 **F**（表+Word）；步骤 2/3a 用 `excel_write`（`rows_from_json` / `rows_from_excel` 动态行），步骤 3b 用 `python_snippet` 注入匹配计算代码（录制时立即验证）。  
 - **`python_snippet` 设计原理：** **[articles/python-snippet-design.md](articles/python-snippet-design.md)**（执行环境、验证机制、完整 JSON 示例）。
 
 
@@ -268,7 +275,7 @@ python3 rpa_manager.py env-check
 
 **SSH 克隆：** `git@github.com:laziobird/openclaw-rpa.git`
 
-装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 `**SKILL.md`**。触发词见 `**SKILL.md**`（如 `#RPA`、`#自动化机器人`）。
+装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 `**SKILL.md`**。触发词见 `**SKILL.md**`（如 `#RPA`、`#rpa`）。
 
 ### `requirements.txt` 全量依赖是什么？
 

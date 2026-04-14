@@ -74,6 +74,8 @@ SESSIONS_DIR     = Path.home() / ".openclaw" / "rpa" / "sessions"
 # record-step 等待 recorder_server 写出 result_{seq}.json 的最长时间
 # Max wait time for recorder_server to write result_{seq}.json after each record-step
 RECORD_STEP_RESULT_WAIT_S   = 120
+# extract_by_vision 需调用多模态 API + 截图，易超过 120s；轮询上限单独放宽
+RECORD_STEP_RESULT_WAIT_VISION_S = 300
 RECORD_STEP_POLL_INTERVAL_S = 0.2
 RECORD_STEP_POLL_ITERATIONS = int(RECORD_STEP_RESULT_WAIT_S / RECORD_STEP_POLL_INTERVAL_S)  # 600
 
@@ -83,6 +85,47 @@ MIN_PROOF_BYTES = 64
 
 
 # ── 登录会话 helpers / Login session helpers ─────────────────
+
+def _fix_json_literal_newlines(raw: str) -> str:
+    """修复 AI 用 Write 工具写 JSON 时，字符串值内含字面换行（不是 \\n）导致 JSON 非法的问题。
+
+    策略：逐字符扫描，在 JSON 字符串值（双引号内）里遇到裸 CR/LF 就替换为 \\n/\\r，
+    同时正确处理 \\\\ 转义序列，不碰 JSON 结构本身的换行。
+    """
+    out: list[str] = []
+    in_str = False
+    i = 0
+    while i < len(raw):
+        ch = raw[i]
+        if in_str:
+            if ch == "\\":
+                # 转义序列：原样保留两个字符
+                out.append(ch)
+                i += 1
+                if i < len(raw):
+                    out.append(raw[i])
+                    i += 1
+                continue
+            elif ch == '"':
+                in_str = False
+                out.append(ch)
+            elif ch == "\n":
+                out.append("\\n")
+            elif ch == "\r":
+                out.append("\\r")
+            elif ch == "\t":
+                out.append("\\t")
+            else:
+                out.append(ch)
+        else:
+            if ch == '"':
+                in_str = True
+                out.append(ch)
+            else:
+                out.append(ch)
+        i += 1
+    return "".join(out)
+
 
 def _domain_from_url(url: str) -> str:
     """从 URL 提取 hostname，去掉 www. 前缀，用作会话目录名。
@@ -847,12 +890,40 @@ def cmd_record_start(
     return 0
 
 
-def cmd_record_step(step_json: str) -> int:
+def cmd_record_step(step_json: Optional[str], from_file: Optional[str] = None) -> int:
     """Send one step command to the recorder server and print result."""
-    try:
-        data = json.loads(step_json)
-    except json.JSONDecodeError as e:
-        print(f"❌ 无效 JSON：{e}", file=sys.stderr)
+    if from_file:
+        fp = Path(from_file).expanduser().resolve()
+        if not fp.exists():
+            print(f"❌ --from-file 路径不存在：{fp}", file=sys.stderr)
+            return 1
+        try:
+            raw = fp.read_text(encoding="utf-8")
+        except OSError as e:
+            print(f"❌ 无法读取 --from-file：{e}", file=sys.stderr)
+            return 1
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            fixed = _fix_json_literal_newlines(raw)
+            try:
+                data = json.loads(fixed)
+                print("⚠️  --from-file JSON 已自动修复（code 字段含字面换行）", file=sys.stderr)
+            except json.JSONDecodeError as e2:
+                print(f"❌ --from-file 文件内容不是有效 JSON：{e2}", file=sys.stderr)
+                return 1
+    elif step_json:
+        try:
+            data = json.loads(step_json)
+        except json.JSONDecodeError:
+            fixed = _fix_json_literal_newlines(step_json)
+            try:
+                data = json.loads(fixed)
+            except json.JSONDecodeError as e2:
+                print(f"❌ 无效 JSON：{e2}", file=sys.stderr)
+                return 1
+    else:
+        print("❌ 需提供 JSON 参数或 --from-file 文件路径。/ Provide JSON argument or --from-file path.", file=sys.stderr)
         return 1
 
     pid_path = SESSION_REC_DIR / "server.pid"
@@ -865,15 +936,21 @@ def cmd_record_step(step_json: str) -> int:
     data["seq"] = new_seq
     cmd_path.write_text(json.dumps(data, ensure_ascii=False))
 
-    # Poll for result (up to RECORD_STEP_RESULT_WAIT_S)
+    # Poll for result（视觉步骤单独延长等待，避免 VL API 慢导致 120s 误报超时）
+    wait_s = (
+        RECORD_STEP_RESULT_WAIT_VISION_S
+        if data.get("action") == "extract_by_vision"
+        else RECORD_STEP_RESULT_WAIT_S
+    )
+    max_polls = int(wait_s / RECORD_STEP_POLL_INTERVAL_S)
     result_path = SESSION_REC_DIR / f"result_{new_seq}.json"
-    for _ in range(RECORD_STEP_POLL_ITERATIONS):
+    for _ in range(max_polls):
         if result_path.exists():
             break
         time.sleep(RECORD_STEP_POLL_INTERVAL_S)
     else:
         print(
-            f"❌ 等待结果超时（{RECORD_STEP_RESULT_WAIT_S}s）。action={data.get('action')}",
+            f"❌ 等待结果超时（{wait_s}s）。action={data.get('action')}",
             file=sys.stderr,
         )
         _append_playwright_cmd_log(
@@ -883,7 +960,7 @@ def cmd_record_step(step_json: str) -> int:
                 "seq": new_seq,
                 "command": data,
                 "success": False,
-                "error": f"等待结果超时（{RECORD_STEP_RESULT_WAIT_S}s），未收到 result_{new_seq}.json",
+                "error": f"等待结果超时（{wait_s}s），未收到 result_{new_seq}.json",
                 "code_block": None,
             }
         )
@@ -1066,15 +1143,134 @@ def cmd_record_end(abort: bool = False) -> int:
     registry[task_name] = f"{filename}.py"
     save_registry(registry)
 
+    # ── 若录制了 extract_by_vision 步骤，自动生成 vision_setup.md ──────────────
+    vision_doc_path: "Path | None" = None
+    vision_steps_file = SESSION_REC_DIR / "vision_steps.json"
+    if vision_steps_file.exists():
+        try:
+            vs_data = json.loads(vision_steps_file.read_text(encoding="utf-8"))
+            vision_doc_path = _generate_vision_setup_doc(
+                task_name=vs_data.get("task", task_name),
+                model_key=vs_data.get("model_key", "qwen"),
+                model=vs_data.get("model", "qwen3-vl-plus"),
+                steps=vs_data.get("steps", []),
+                script_path=output_path,
+            )
+        except Exception as e:
+            print(f"⚠️  生成 vision_setup.md 失败（非致命）：{e}", file=sys.stderr)
+
     print(f"✨ RPA 脚本生成成功！")
     print(f"📄 文件：{output_path}")
     print(f"📋 共录制 {step_count} 个步骤")
+    if vision_doc_path:
+        print(f"👁️  视觉识别文档：{vision_doc_path}")
     if archive_log.exists():
         print(f"📝 指令日志（副本）：{archive_log}")
     print(f"📸 截图目录：{SESSION_REC_DIR / 'screenshots'}")
     print(f"\n运行方式：python3 {output_path}")
     print(f'下次直接说"运行：{task_name}"即可重放。')
     return 0
+
+
+def _generate_vision_setup_doc(
+    task_name: str,
+    model_key: str,
+    model: str,
+    steps: list[dict],
+    script_path: "Path",
+) -> "Path":
+    """生成视觉识别使用说明文档，与 RPA 脚本放在同一目录。"""
+    from datetime import datetime as _dt
+
+    _VISION_META = {
+        "qwen": {
+            "label":   "Qwen3-VL-Plus（阿里云百炼）",
+            "key_env": "DASHSCOPE_API_KEY",
+            "key_url": "https://bailian.console.aliyun.com → API Key 管理",
+            "price":   "约 ¥0.002/次截图",
+        },
+        "gemini": {
+            "label":   "Gemini 3 Pro（Google AI Studio）",
+            "key_env": "GOOGLE_AI_KEY",
+            "key_url": "https://aistudio.google.com/app/apikey",
+            "price":   "约 ¥0.01/次截图",
+        },
+    }
+    meta = _VISION_META.get(model_key, _VISION_META["qwen"])
+
+    step_rows = ""
+    for s in steps:
+        preview_str = "、".join(
+            f'**{k}**：{v}' for k, v in s.get("preview", {}).items() if v
+        ) or "（无内容）"
+        step_rows += (
+            f"| 步骤 {s['step']} | {', '.join(s.get('fields', []))} "
+            f"| {s.get('file','')} | {preview_str} |\n"
+        )
+
+    vision_count = len(steps)
+    config_line_hint = script_path.name
+
+    doc = f"""\
+# 视觉识别配置说明 — {task_name}
+
+> 本文档由 OpenClaw RPA 录制结束时自动生成 · {_dt.now().strftime('%Y-%m-%d %H:%M')}
+
+## 使用的视觉模型
+
+| 项目 | 内容 |
+|---|---|
+| **模型名称** | {meta['label']} |
+| **Model ID** | `{model}` |
+| **API Key 环境变量** | `{meta['key_env']}` |
+| **获取地址** | {meta['key_url']} |
+
+## API Key 管理
+
+脚本的 `CONFIG["vision_api_key"]` 已在录制时自动写入，**直接运行无需额外配置**。
+
+若 API Key 失效，有两种更新方式：
+
+**方式 A：更新脚本（推荐）**
+```python
+# 编辑 {config_line_hint}，找到 CONFIG 字典并修改：
+"vision_api_key":  "你的新 Key",
+```
+
+**方式 B：重新录制**
+```
+说「运行：{task_name}」重录，录制时重新粘贴新 Key 即可。
+```
+
+## 录制时的视觉提取效果
+
+| 步骤 | 提取字段 | 输出文件 | 录制时识别结果 |
+|---|---|---|---|
+{step_rows}
+> ✅ 以上为录制时**真实调用** {meta['label']} API 的提取结果。
+
+## 费用估算
+
+| 项目 | 数量 | 单价 | 小计 |
+|---|---|---|---|
+| 视觉 API 调用 | 每次运行 {vision_count} 次 | {meta['price']} | 约 ¥{0.002 * vision_count:.3f}–¥{0.01 * vision_count:.3f} |
+| 每月 30 次运行 | {vision_count * 30} 次 | — | 约 ¥{0.002 * vision_count * 30:.2f}–¥{0.01 * vision_count * 30:.2f} |
+
+## 常见问题
+
+**Q：截图内容不对，提取字段为空**  
+A：在录制时加 `"crop_selector": "main"` 将截图范围限定在页面主体区域。
+
+**Q：想换成 Gemini 3 Pro**  
+A：重新录制，在视觉模型选择时输入 `B`，粘贴 Google AI Studio Key 即可。
+
+**Q：API Key 不想写进脚本文件**  
+A：将 Key 设为环境变量 `{meta['key_env']}`，脚本启动时会自动读取（需手动修改脚本读取逻辑）。
+"""
+
+    doc_path = script_path.parent / f"{script_path.stem}_vision_setup.md"
+    doc_path.write_text(doc, encoding="utf-8")
+    return doc_path
 
 
 # ── Playwright 脚本生成 / Playwright script generation ──────────────────────
@@ -1329,7 +1525,19 @@ def main():
     p_di.add_argument("capability", help="单字母：A–G 或 N")
 
     p_rp = sub.add_parser("record-step",   help="向 Recorder 发送单步操作（含 select_option）")
-    p_rp.add_argument("step_json", help='操作 JSON，如 \'{"action":"snapshot"}\'')
+    p_rp.add_argument(
+        "step_json",
+        nargs="?",
+        default=None,
+        help='操作 JSON 字符串，如 \'{"action":"snapshot"}\'（与 --from-file 二选一）',
+    )
+    p_rp.add_argument(
+        "--from-file",
+        metavar="PATH",
+        default=None,
+        dest="from_file",
+        help="从文件读取操作 JSON（适用于 exec 工具不允许复杂 shell 参数的环境）",
+    )
 
     sub.add_parser("record-status", help="查看 Recorder 运行状态与已录步骤")
 
@@ -1383,7 +1591,10 @@ def main():
         ),
         "deps-check":    lambda: cmd_deps_check(args.capability),
         "deps-install":  lambda: cmd_deps_install(args.capability),
-        "record-step":   lambda: cmd_record_step(args.step_json),
+        "record-step":   lambda: cmd_record_step(
+            getattr(args, "step_json", None),
+            getattr(args, "from_file", None),
+        ),
         "record-status": cmd_record_status,
         "record-end":    lambda: cmd_record_end(getattr(args, "abort", False)),
         # 计划管理

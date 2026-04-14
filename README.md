@@ -76,7 +76,7 @@ You (plain language)
  AI drives real Chrome     ← record-step (screenshot proof every step)
       │
       ▼
- "end recording"           ← synthesize
+ `#end`                     ← synthesize
       │
       ▼
  rpa/<task>.py             ← standalone Playwright Python script
@@ -194,6 +194,13 @@ apikey  UXZ3BOXOH817CQWS
 Open Sina Finance https://finance.sina.com.cn/, search for NVDA, click "Company News" on the left, save the top 5 headlines to nvda_news.txt on the Desktop.
 Merge nvda_time_series_daily.json and nvda_news.txt into nvda.txt.
 ```
+
+### 4. Airbnb Competitor Price Tracker (Browser + Word)
+
+**Scenario:** Zero-code creation of an RPA robot that automatically opens a browser, extracts Airbnb competitor prices and ratings, and generates a Word report.
+
+- **Full tutorial (CN):** **[articles/scenario-airbnb-compare.md](articles/scenario-airbnb-compare.md)**
+- **Notes:** Record once, auto-generate a Python script. Replay runs the underlying code directly—extremely fast, zero Token cost, and no AI hallucinations.
 
 ### 4. OpenClaw + Feishu/Lark: `#rpa-list`, `#rpa-run`, and scheduled run
 

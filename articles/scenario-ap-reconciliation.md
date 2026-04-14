@@ -1,7 +1,7 @@
 # 案例：财务对账（API财务系统数据 + 本地财务 Excel + 输出 Word 对账表）
 
 > **简化版**：云端 API **只负责「拉待对账数据」**；会计在**本机 Excel** 里完成与发票明细的核对；最终把**对账结果**存成一份 **Word（`.docx`）**，正文里用**表格**展示清单（便于打印、签字或邮件发出）。  
-> 录制建议：`**#rpa-api**` 或 `**#自动化机器人**`，能力码选 **F**（Excel + Word，无网页）或 **G**（若还要开网页）；步骤含 **`api_call`** + **`excel_write`** + **`word_write`**（`table` 参数直接生成表格，无需录完后手补）。
+> 录制建议：`**#rpa-api**` 或 `**#rpa**`，能力码选 **F**（Excel + Word，无网页）或 **G**（若还要开网页）；步骤含 **`api_call`** + **`excel_write`** + **`word_write`**（`table` 参数直接生成表格，无需录完后手补）。
 
 ---
 
@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/13cfda68-5a67-4efa-aa6d-c1ecc501a30e
 | 1 | `#rpa-api` 触发录制 | 选能力码 **F**（Excel + Word，无网页） |
 | 2 | `api_call` 拉待对账数据 | GET Mock 接口，结果存 `reconcile_raw.json` |
 | 3 | `excel_write` × 2 | 「系统侧」写接口行；「发票侧」从 `发票导入_本周.xlsx` 复制；`python_snippet` 做本地匹配写「匹配结果」 |
-| 4 | `word_write` 输出报告 | 生成带表格的 `对账报告_YYYYMMDD.docx`；`end recording` → 脚本合成 |
+| 4 | `word_write` 输出报告 | 生成带表格的 `对账报告_YYYYMMDD.docx`；`#end` → 脚本合成 |
 
 ---
 

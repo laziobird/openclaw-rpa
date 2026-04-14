@@ -111,7 +111,7 @@ AI 接着执行排序操作：
 
 ![价格从高到低排序结果](../images/autoLogin_5.png)
 
-发送 `#结束录制`，生成 `rpa/自动登录V3.py`，生成脚本 `CONFIG` 中自动包含：
+发送 `#end`，生成 `rpa/自动登录V3.py`，生成脚本 `CONFIG` 中自动包含：
 
 ```python
 CONFIG = {

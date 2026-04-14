@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/c994d58a-9cbb-42e4-a01e-7d9899a39ebe
 | 1 | Trigger with `#rpa-api` | Select capability **F** (Excel + Word, no browser) |
 | 2 | `api_call` — pull open payables | GET Mock endpoint; save result as `reconcile_raw.json` |
 | 3 | `excel_write` × 2 + `python_snippet` | "System" sheet from API rows; "Invoices" sheet copied from `invoice_import_thisweek.xlsx`; local matching logic writes "Match Results" |
-| 4 | `word_write` — generate report | Produces `ap_reconciliation_YYYYMMDD.docx` with a table; `end recording` → script synthesized |
+| 4 | `word_write` — generate report | Produces `ap_reconciliation_YYYYMMDD.docx` with a table; `#end` → script synthesized |
 
 ---
 

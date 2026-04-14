@@ -119,7 +119,7 @@ Screenshot confirming the sort:
 
 ![Products sorted price high → low](../images/autoLogin_5.png)
 
-Send `#end recording`. The script `rpa/autologinv3.py` is generated.  
+Send `#end`. The script `rpa/autologinv3.py` is generated.  
 `CONFIG` in the output script automatically includes:
 
 ```python
