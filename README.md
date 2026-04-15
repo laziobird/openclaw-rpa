@@ -353,6 +353,13 @@ Full guide — key embedding strategy, env field, examples:
 
 ---
 
+## Author Contact
+
+- WeChat: `nizhanali`
+- Gmail: `greentim2049@gmail.com`
+
+---
+
 <p align="center">
   <sub>Apache License 2.0 · Copyright © 2026 openclaw-rpa contributors</sub>
 </p>

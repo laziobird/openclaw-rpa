@@ -346,4 +346,11 @@ python3 rpa_manager.py run wikipedia
 
 ---
 
+## 作者联系方式
+
+- 微信号：`nizhanali`
+- Gmail：`greentim2049@gmail.com`
+
+---
+
 Apache License 2.0 · 版权 © 2026 openclaw-rpa contributors
