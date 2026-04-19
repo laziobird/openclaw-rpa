@@ -42,7 +42,8 @@ Current AI Web、Computer、Workflow Agents are amazing but **fundamentally flaw
 | 💸 **Cost:** $$$ (Tokens) | 💰 **Cost:** $0.00 (Pure Python) |
 | 🐢 **Speed:** Slow (Reasoning) | 🚀 **Speed:** Instant (Execution) |
 
-### **Competitive Analysis: The RPA Evolution**
+#<details>
+<summary><strong>Competitive Analysis: The RPA Evolution</strong></summary>
 
 | Feature | Legacy RPA (UIPath, etc.) | Pure LLM Agents (Browser-use) | **OpenClaw-RPA (The Compiler)** |
 | :--- | :--- | :--- | :--- |
@@ -53,6 +54,8 @@ Current AI Web、Computer、Workflow Agents are amazing but **fundamentally flaw
 | **2FA Handling** | Extremely Complex | Costly (Requires live reasoning) | **Simple (One-time session capture)** |
 | **Environment** | Windows & MS Office | Flexible (But expensive) | **Cloud-Native (Linux/Docker ready)** |
 | **Architecture** | Manual Flowcharts | Real-time Reasoning | **Reason Once → Compile → Replay** |
+
+</details>
 
 
 ## What you can automate
@@ -94,25 +97,6 @@ You (plain language)
 | 🐢 **Speed** | Waiting for model inference before each step is orders of magnitude slower than running a local script directly |
 
 **What openclaw-rpa does instead:** use AI to record and verify once, then replay with a local script — **no model call, no token burn, no hallucination risk, runs in seconds**.
-
-## Quick start
-
-```bash
-# Install
-git clone https://github.com/laziobird/openclaw-rpa.git
-cd openclaw-rpa && ./scripts/install.sh
-
-# In an OpenClaw chat — pick your trigger:
-#RPA                   # browser-only flow
-#rpa-api               # flow that includes an HTTP API call
-#rpa-login <url>       # save a login session (cookies)
-#rpa-list              # list all recorded tasks
-#rpa-run:<task name>   # replay a recorded task
-```
-
-Full protocol and capability codes (A–G): **[SKILL.en-US.md](SKILL.en-US.md)**.
-
----
 
 ## Case videos
 
@@ -267,6 +251,14 @@ Full protocol: [**SKILL.en-US.md**](SKILL.en-US.md) (ONBOARDING, RECORDING). **S
 
 ## Quick install (OpenClaw)
 
+**Option 1 — OpenClaw CLI (recommended):**
+
+```bash
+openclaw skills install openclaw-rpa
+```
+
+**Option 2 — Manual (git clone):**
+
 Put the skill here: **`~/.openclaw/workspace/skills/openclaw-rpa`**
 
 ```bash
@@ -285,9 +277,22 @@ If your flow uses **Excel / Word** (capability **B–G** in **SKILL.en-US.md** /
 
 **SSH clone:** `git@github.com:laziobird/openclaw-rpa.git`
 
-After install, **start a new OpenClaw chat** (or reload skills) so the agent reads **`SKILL.md`**. Triggers and keywords: **`SKILL.md`** (e.g. `#RPA`, `#automation robot`).
+After install, **start a new OpenClaw chat** (or reload skills) so the agent reads **`SKILL.md`**.
 
-### What “full” `requirements.txt` means
+**Triggers — pick one to start:**
+
+```
+#RPA                   # browser-only flow
+#rpa-api               # flow that includes an HTTP API call
+#rpa-login <url>       # save a login session (cookies)
+#rpa-list              # list all recorded tasks
+#rpa-run:<task name>   # replay a recorded task
+```
+
+Full protocol and capability codes (A–G): **[SKILL.en-US.md](SKILL.en-US.md)**.
+
+<details>
+<summary><strong>What “full” <code>requirements.txt</code> means</strong></summary>
 
 **Full stack** = every Python package listed in `requirements.txt` **plus** Chromium from `playwright install chromium`, all in the **same** environment as `rpa_manager.py` (e.g. `.venv` from `./scripts/install.sh`).
 
@@ -300,6 +305,8 @@ After install, **start a new OpenClaw chat** (or reload skills) so the agent rea
 | **Chromium** | Installed by `playwright install chromium`, not via `pip` |
 
 See comment block at the top of `requirements.txt` for the same breakdown.
+
+</details>
 
 ---
 
@@ -324,6 +331,9 @@ Recorder: `record-start` → `record-step` → `record-end` (see `rpa_manager.py
 
 ## Sample scripts (`rpa/`)
 
+<details>
+<summary>View all sample scripts</summary>
+
 | Script | Notes |
 |--------|--------|
 | `wikipedia.py` / `wiki.py` | Wikipedia (English) |
@@ -333,6 +343,8 @@ Recorder: `record-start` → `record-step` → `record-end` (see `rpa_manager.py
 | `apiv3.py` (`apiV3`) | **API only** — Alpha Vantage `TIME_SERIES_DAILY` for NVDA → saves `nvda_time_series_daily.json` to Desktop; no browser steps |
 | `reconciliationv2.py` (`reconciliationV2`) | **AP reconciliation (EN)** — Mock GET open payables → `ap_draft_thisweek.xlsx` (System / Invoices / Match Results sheets, two-stage po_ref + amount matching) → `ap_reconciliation_YYYYMMDD.docx` Word table report (see [scenario](articles/scenario-ap-reconciliation.en-US.md)) |
 | `会计记账v2.py` (`会计记账V2`) | **AP reconciliation (CN)** — same flow in Chinese: Mock GET → `对账底稿_本周.xlsx`（系统侧 / 发票侧 / 匹配结果）→ `对账报告_YYYYMMDD.docx` Word table report (see [scenario](articles/scenario-ap-reconciliation.md)) |
+
+</details>
 
 ---
 
@@ -355,7 +367,8 @@ Full guide — key embedding strategy, env field, examples:
 
 ## Author Contact
 
-### Enterprise & industry-specific customization
+<details>
+<summary><strong>Enterprise &amp; industry-specific customization</strong></summary>
 
 This repo ships as an **open-source skill** with a **general recording protocol**—great for individuals and teams automating typical browser and local-file workflows. If your needs look more like the table below, reach out via the channels at the bottom with **industry context, system boundaries, compliance constraints, and how you want it delivered**. We can discuss **tailored builds** for complex commercial scenarios (scope, timeline, and pricing depend on the engagement—no obligation to quote).
 
@@ -365,6 +378,8 @@ This repo ships as an **open-source skill** with a **general recording protocol*
 | **Vertical / industry fit** | Finance, supply chain, e-commerce ops, general price-comparison systems, internal ERP/OA plus external sites—field definitions, audit trails, and report layouts aligned to your org |
 | **Integration & operations** | Hooks into your gateway, queues, secrets management, scheduling at scale, private or air-gapped-style deployments |
 | **Reliability at scale** | High-friction sites, vision + DOM hybrid flows, custom validation and document templates, stronger performance and observability |
+
+</details>
 
 **Contact (open-source questions or commercial inquiries):**
 

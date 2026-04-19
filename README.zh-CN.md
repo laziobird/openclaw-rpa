@@ -43,7 +43,8 @@ https://github.com/user-attachments/assets/e3ed5b34-1ddb-43a6-af42-2d1a907d3564
 
 ![shopping-hd-960p](https://github.com/user-attachments/assets/4c30d799-803e-458b-a496-ee5f38513da8)
 
-### 竞争优势 
+<details>
+<summary><strong>竞争优势对比</strong></summary>
 
 | 特性 | 传统 RPA (UIPath 等) | 纯 LLM Agent (Browser-use 等) | **OpenClaw-RPA (编译器模式)** |
 | :--- | :--- | :--- | :--- |
@@ -54,6 +55,9 @@ https://github.com/user-attachments/assets/e3ed5b34-1ddb-43a6-af42-2d1a907d3564
 | **2FA 处理** | **极其复杂** | **昂贵** (需实时推理配合) | **简单 (Session 一次性捕获)** |
 | **部署环境** | **Windows & MS Office 依赖** | **灵活** (但运行成本高) | **云原生 (支持 Linux/Docker)** |
 | **技术架构** | 人工绘制流程图 | 实时在线推理 | **一次推理 → 编译 → 永久重放** |
+
+</details>
+
 
 ## 工作原理
 
@@ -85,25 +89,6 @@ https://github.com/user-attachments/assets/e3ed5b34-1ddb-43a6-af42-2d1a907d3564
 | 🐢 **速度慢** | 每一步都要等模型推理再执行，整个流程比直接跑脚本慢一个数量级 |
 
 **openclaw-rpa 的做法：** 用 AI 录制一次、验证一次，之后所有重复执行走本地脚本——**不调模型、不烧 token、不怕幻觉、秒级完成**。
-
-## 快速开始
-
-```bash
-# 安装
-git clone https://github.com/laziobird/openclaw-rpa.git
-cd openclaw-rpa && ./scripts/install.sh
-
-# 在 OpenClaw 对话中，选择触发词：
-#rpa                   # 纯网页流程
-#rpa-api               # 含 HTTP API 的流程
-#rpa-login <url>       # 保存登录会话（Cookie）
-#rpa-list              # 列出所有已录制任务
-#rpa-run:<任务名>      # 回放已录制任务
-```
-
-完整协议与能力码（A–G）：**[SKILL.zh-CN.md](SKILL.zh-CN.md)**。
-
----
 
 ## 案例视频
 
@@ -259,7 +244,15 @@ https://github.com/user-attachments/assets/514e2d74-f42a-4243-8d49-52931fe6c22e
 
 ## 快速安装（OpenClaw）
 
-技能目录：`**~/.openclaw/workspace/skills/openclaw-rpa`**
+**方式一 — OpenClaw 命令行（推荐）：**
+
+```bash
+openclaw skills install openclaw-rpa
+```
+
+**方式二 — 手动安装（git clone）：**
+
+技能目录：**`~/.openclaw/workspace/skills/openclaw-rpa`**
 
 ```bash
 mkdir -p ~/.openclaw/workspace/skills
@@ -277,9 +270,22 @@ python3 rpa_manager.py env-check
 
 **SSH 克隆：** `git@github.com:laziobird/openclaw-rpa.git`
 
-装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 `**SKILL.md`**。触发词见 `**SKILL.md**`（如 `#RPA`、`#rpa`）。
+装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 **`SKILL.md`**。
 
-### `requirements.txt` 全量依赖是什么？
+**触发词 — 选一个开始录制：**
+
+```
+#rpa                   # 纯网页流程
+#rpa-api               # 含 HTTP API 的流程
+#rpa-login <url>       # 保存登录会话（Cookie）
+#rpa-list              # 列出所有已录制任务
+#rpa-run:<任务名>      # 回放已录制任务
+```
+
+完整协议与能力码（A–G）：**[SKILL.zh-CN.md](SKILL.zh-CN.md)**。
+
+<details>
+<summary><strong><code>requirements.txt</code> 全量依赖说明</strong></summary>
 
 **「全量」**指：与本技能配套的 **所有 Python 包**（见仓库根目录 `requirements.txt`）以及 **`playwright install chromium`** 所安装的 Chromium，都应装在 **同一个** 用于执行 `rpa_manager.py` / 录制的 Python 环境里（例如 `./scripts/install.sh` 创建的 `.venv`）。
 
@@ -292,6 +298,8 @@ python3 rpa_manager.py env-check
 | **Chromium** | 由 `python -m playwright install chromium` 下载，**不属于** `pip` 包 |
 
 未列在表里的系统库：一般只需本机已有 Python 3.8+；macOS/Linux 常见环境即可。若只做纯网页录制且确定不用 Excel/Word，技术上可只装 `playwright`+`httpx`，但**推荐**仍使用完整 `requirements.txt`，避免 `record-step excel_write` 时报缺包。
+
+</details>
 
 ---
 
@@ -316,6 +324,8 @@ python3 rpa_manager.py run wikipedia
 
 ## 示例脚本（`rpa/`）
 
+<details>
+<summary>查看所有示例脚本</summary>
 
 | 脚本 | 说明 |
 |------|------|
@@ -325,6 +335,8 @@ python3 rpa_manager.py run wikipedia
 | `apiv3.py`（`apiV3`） | **纯 API** — Alpha Vantage `TIME_SERIES_DAILY` 拉取 NVDA 日线数据 → 保存 `nvda_time_series_daily.json` 到桌面；无浏览器步骤 |
 | `reconciliationv2.py`（`reconciliationV2`） | **应付对账（英文版）** — Mock GET 拉待对账数据 → `ap_draft_thisweek.xlsx`（System / Invoices / Match Results，两阶段 po_ref + 金额匹配）→ `ap_reconciliation_YYYYMMDD.docx` Word 表格报告（见[案例文档](articles/scenario-ap-reconciliation.en-US.md)） |
 | `会计记账v2.py`（`会计记账V2`） | **应付对账（中文版）** — 同上流程中文化：Mock GET → `对账底稿_本周.xlsx`（系统侧 / 发票侧 / 匹配结果）→ `对账报告_YYYYMMDD.docx` Word 表格报告（见[案例文档](articles/scenario-ap-reconciliation.md)） |
+
+</details>
 
 ---
 
@@ -348,7 +360,8 @@ python3 rpa_manager.py run wikipedia
 
 ## 作者联系方式
 
-### 商业与行业场景定制
+<details>
+<summary><strong>商业与行业场景定制</strong></summary>
 
 本仓库以 **开源技能 + 通用录制协议** 为主，适合个人与团队快速落地常见网页 / 文件自动化。若你的需求属于下列一类，欢迎通过下方联系方式说明 **行业、系统边界、合规要求与期望交付形态**，我们可以讨论 **按需定制** 的方案（非义务报价，视复杂度与排期而定）：
 
@@ -358,6 +371,8 @@ python3 rpa_manager.py run wikipedia
 | **行业专属** | 财务 / 供应链 / 电商运营 / 通用比价系统、内部 ERP / OA 与外部站点组合等，需要贴合字段口径与审计留痕 |
 | **集成与运维** | 与现有网关、队列、监控、密钥管理对接；定时任务集群化；私有化或指定环境部署 |
 | **稳定性与扩展** | 强风控站点策略、视觉 + DOM 混合、定制校验与报表模板、性能与可观测性要求更高时 |
+
+</details>
 
 **联系方式（咨询开源使用或商业定制均可）：**
 
