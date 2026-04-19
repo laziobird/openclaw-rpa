@@ -42,7 +42,7 @@ Current AI Web、Computer、Workflow Agents are amazing but **fundamentally flaw
 | 💸 **Cost:** $$$ (Tokens) | 💰 **Cost:** $0.00 (Pure Python) |
 | 🐢 **Speed:** Slow (Reasoning) | 🚀 **Speed:** Instant (Execution) |
 
-#<details>
+<details>
 <summary><strong>Competitive Analysis: The RPA Evolution</strong></summary>
 
 | Feature | Legacy RPA (UIPath, etc.) | Pure LLM Agents (Browser-use) | **OpenClaw-RPA (The Compiler)** |
