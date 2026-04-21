@@ -10,5 +10,6 @@
   "会计记账V2": "会计记账v2.py",
   "携程酒店V3": "携程酒店v3.py",
   "自动登录V3": "自动登录v3.py",
-  "reconciliationV2": "reconciliationv2.py"
+  "reconciliationV2": "reconciliationv2.py",
+  "amazonbestseller": "amazonbestseller.py"
 }
